@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Moon, Play, Pause, Menu, X, Keyboard } from 'lucide-react';
+import { Moon, Play, Pause, Keyboard } from 'lucide-react';
 import { usePlayerStore } from '@/stores/player-store';
 import { SleepTimerModal } from '@/components/ui/sleep-timer-modal';
 import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal';
+import { MobileMenu } from './mobile-menu';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -173,57 +174,48 @@ export const Navbar: React.FC = () => {
               <Keyboard className="w-3.5 h-3.5" />
             </button>
 
-            {/* Mobile Menu Button */}
+            {/* Animated Luxury Hamburger Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-[#F1F3EF]"
-              aria-label="Toggle navigation menu"
+              className="lg:hidden relative p-2.5 rounded-xl bg-[#202B28]/80 hover:bg-[#283633] border border-[#91AFA9]/25 text-[#F1F3EF] transition-all active:scale-95 flex items-center justify-center w-10 h-10"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <div className="w-4 h-3.5 flex flex-col justify-between items-center">
+                <span
+                  className={`h-[1.5px] rounded-full transition-all duration-300 origin-center ${
+                    mobileMenuOpen
+                      ? 'w-4 translate-y-[6px] rotate-45 bg-[#91AFA9]'
+                      : 'w-4 bg-[#F1F3EF]'
+                  }`}
+                />
+                <span
+                  className={`h-[1.5px] rounded-full transition-all duration-300 ${
+                    mobileMenuOpen
+                      ? 'w-0 opacity-0 scale-x-0'
+                      : 'w-3 -ml-1 bg-[#F1F3EF]'
+                  }`}
+                />
+                <span
+                  className={`h-[1.5px] rounded-full transition-all duration-300 origin-center ${
+                    mobileMenuOpen
+                      ? 'w-4 -translate-y-[6px] -rotate-45 bg-[#91AFA9]'
+                      : 'w-4 bg-[#F1F3EF]'
+                  }`}
+                />
+              </div>
             </button>
           </div>
         </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden glass-nav border-t border-[#91AFA9]/10 px-6 py-6 space-y-4 animate-fade-in shadow-2xl">
-            <nav className="flex flex-col space-y-3 text-sm text-[#B3BDB6]">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="py-1.5 hover:text-[#F1F3EF] border-b border-[#91AFA9]/10"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-            <div className="pt-2 flex flex-col gap-2.5">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setTimerModalOpen(true);
-                }}
-                className="w-full py-2.5 px-4 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-xs text-[#F1F3EF] flex items-center justify-center gap-2"
-              >
-                <Moon className="w-4 h-4 text-[#91AFA9]" />
-                <span>Sleep Timer Settings</span>
-              </button>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setShortcutsModalOpen(true);
-                }}
-                className="w-full py-2.5 px-4 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-xs text-[#F1F3EF] flex items-center justify-center gap-2"
-              >
-                <Keyboard className="w-4 h-4 text-[#91AFA9]" />
-                <span>Keyboard Shortcuts</span>
-              </button>
-            </div>
-          </div>
-        )}
       </header>
+
+      {/* Luxury Sanctuary Mobile Drawer */}
+      <MobileMenu
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        onOpenTimer={() => setTimerModalOpen(true)}
+        onOpenShortcuts={() => setShortcutsModalOpen(true)}
+      />
 
       {/* Modals */}
       <SleepTimerModal isOpen={timerModalOpen} onClose={() => setTimerModalOpen(false)} />
