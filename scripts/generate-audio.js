@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-// Helper to write a 16-bit PCM stereo WAV file with seamless loop blending
+// =========================================================================
+// WAV WRITER — with gentle sleep-friendly limiter
+// =========================================================================
 function createWavBuffer(sampleRate, durationSec, generateSamples) {
   const numChannels = 2;
   const bytesPerSample = 2;
@@ -11,22 +13,17 @@ function createWavBuffer(sampleRate, durationSec, generateSamples) {
   const dataSize = totalSamples * blockAlign;
   const buffer = Buffer.alloc(44 + dataSize);
 
-  // RIFF header
   buffer.write('RIFF', 0);
   buffer.writeUInt32LE(36 + dataSize, 4);
   buffer.write('WAVE', 8);
-
-  // fmt subchunk
   buffer.write('fmt ', 12);
   buffer.writeUInt32LE(16, 16);
-  buffer.writeUInt16LE(1, 20); // PCM
+  buffer.writeUInt16LE(1, 20);
   buffer.writeUInt16LE(numChannels, 22);
   buffer.writeUInt32LE(sampleRate, 24);
   buffer.writeUInt32LE(byteRate, 28);
   buffer.writeUInt16LE(blockAlign, 32);
   buffer.writeUInt16LE(bytesPerSample * 8, 34);
-
-  // data subchunk
   buffer.write('data', 36);
   buffer.writeUInt32LE(dataSize, 40);
 
@@ -34,48 +31,50 @@ function createWavBuffer(sampleRate, durationSec, generateSamples) {
   const right = new Float32Array(totalSamples);
   generateSamples(left, right, totalSamples, sampleRate);
 
-  // Seamless 2.0-second equal-power loop crossfade at boundaries
-  const fadeLength = Math.floor(sampleRate * 2.0);
+  // Seamless equal-power loop crossfade (2.5s)
+  const fadeLength = Math.floor(sampleRate * 2.5);
   for (let i = 0; i < fadeLength; i++) {
     const t = i / fadeLength;
     const headWeight = Math.sin(t * Math.PI * 0.5);
     const tailWeight = Math.cos(t * Math.PI * 0.5);
     const tailIndex = totalSamples - fadeLength + i;
-
     const blendedLeft = left[i] * headWeight + left[tailIndex] * tailWeight;
     const blendedRight = right[i] * headWeight + right[tailIndex] * tailWeight;
-
     left[i] = blendedLeft;
     right[i] = blendedRight;
     left[tailIndex] = blendedLeft;
     right[tailIndex] = blendedRight;
   }
 
-  // Write samples with smooth analog-style warm soft saturation
+  // Sleep-friendly: gentle tanh saturation, then soft-knee limiter
+  // Target RMS ~0.12 (-18 dBFS) for calm, non-fatiguing level
   let offset = 44;
   for (let i = 0; i < totalSamples; i++) {
-    let l = left[i];
-    let r = right[i];
+    // Warm analog saturation (very gentle)
+    let l = Math.tanh(left[i] * 0.95) * 0.90;
+    let r = Math.tanh(right[i] * 0.95) * 0.90;
 
-    // Warm soft-knee limiter
-    l = Math.tanh(l * 1.05) * 0.88;
-    r = Math.tanh(r * 1.05) * 0.88;
+    // Soft-knee peak limiter at 0.92 to prevent any harsh clipping
+    if (l > 0.92) l = 0.92 + (l - 0.92) * 0.4;
+    else if (l < -0.92) l = -0.92 + (l + 0.92) * 0.4;
+    if (r > 0.92) r = 0.92 + (r - 0.92) * 0.4;
+    else if (r < -0.92) r = -0.92 + (r + 0.92) * 0.4;
 
     const intL = Math.max(-32767, Math.min(32767, Math.floor(l * 32767)));
     const intR = Math.max(-32767, Math.min(32767, Math.floor(r * 32767)));
-
     buffer.writeInt16LE(intL, offset);
     buffer.writeInt16LE(intR, offset + 2);
     offset += 4;
   }
-
   return buffer;
 }
 
 const SAMPLE_RATE = 44100;
-const DURATION = 24; // 24 seconds loopable for rich variety, natural phasing, and breathing room
+const DURATION = 30; // 30s loop — longer = less perceived repetition for sleep
 
-// Lowpass Biquad Filter helper
+// =========================================================================
+// FILTERS
+// =========================================================================
 class BiquadLP {
   constructor(cutoff, sampleRate, q = 0.707) {
     const w0 = 2 * Math.PI * cutoff / sampleRate;
@@ -97,15 +96,35 @@ class BiquadLP {
   }
 }
 
-// Bandpass Biquad Filter helper
+class BiquadHP {
+  constructor(cutoff, sampleRate, q = 0.707) {
+    const w0 = 2 * Math.PI * cutoff / sampleRate;
+    const alpha = Math.sin(w0) / (2 * q);
+    const cosw0 = Math.cos(w0);
+    const a0 = 1 + alpha;
+    this.b0 = ((1 + cosw0) / 2) / a0;
+    this.b1 = (-(1 + cosw0)) / a0;
+    this.b2 = ((1 + cosw0) / 2) / a0;
+    this.a1 = (-2 * cosw0) / a0;
+    this.a2 = (1 - alpha) / a0;
+    this.x1 = 0; this.x2 = 0; this.y1 = 0; this.y2 = 0;
+  }
+  process(x) {
+    const y = this.b0 * x + this.b1 * this.x1 + this.b2 * this.x2 - this.a1 * this.y1 - this.a2 * this.y2;
+    this.x2 = this.x1; this.x1 = x;
+    this.y2 = this.y1; this.y1 = y;
+    return y;
+  }
+}
+
 class BiquadBP {
   constructor(centerFreq, sampleRate, q = 2.0) {
     const w0 = 2 * Math.PI * centerFreq / sampleRate;
     const alpha = Math.sin(w0) / (2 * q);
     const a0 = 1 + alpha;
-    this.b0 = (alpha) / a0;
+    this.b0 = alpha / a0;
     this.b1 = 0;
-    this.b2 = (-alpha) / a0;
+    this.b2 = -alpha / a0;
     this.a1 = (-2 * Math.cos(w0)) / a0;
     this.a2 = (1 - alpha) / a0;
     this.x1 = 0; this.x2 = 0; this.y1 = 0; this.y2 = 0;
@@ -119,409 +138,759 @@ class BiquadBP {
 }
 
 // =========================================================================
-// 1. REALISTIC CONTINUOUS RAIN (Acoustically calibrated to YouTube eTeD8DAta4c)
-// Layer A: Smooth continuous pink/brown rain bed (warmth peak 650Hz, soft 2.8kHz LP)
-// Layer B: Dense irregular stochastic raindrop patter (Poisson distributed micro-bursts)
-// Layer C: Subtle resonant water droplets and surface splashes
+// PINK & BROWN NOISE GENERATORS (shared, high quality)
+// =========================================================================
+class PinkNoise {
+  constructor() {
+    this.b0 = 0; this.b1 = 0; this.b2 = 0;
+    this.b3 = 0; this.b4 = 0; this.b5 = 0; this.b6 = 0;
+  }
+  next() {
+    const w = Math.random() * 2 - 1;
+    this.b0 = 0.99886 * this.b0 + w * 0.0555179;
+    this.b1 = 0.99332 * this.b1 + w * 0.0750759;
+    this.b2 = 0.96900 * this.b2 + w * 0.1538520;
+    this.b3 = 0.86650 * this.b3 + w * 0.3104856;
+    this.b4 = 0.55000 * this.b4 + w * 0.5329522;
+    this.b5 = -0.7616 * this.b5 - w * 0.0168980;
+    const pink = this.b0 + this.b1 + this.b2 + this.b3 + this.b4 + this.b5 + this.b6 + w * 0.5362;
+    this.b6 = w * 0.115926;
+    return pink * 0.11;
+  }
+}
+
+class BrownNoise {
+  constructor() {
+    this.value = 0;
+  }
+  next() {
+    const w = Math.random() * 2 - 1;
+    this.value = (this.value + 0.02 * w) / 1.02;
+    return this.value * 3.5;
+  }
+}
+
+// =========================================================================
+// 1. RAIN — Individual droplet physics + smooth bed
+// Each drop: sharp transient + resonant body + tiny noise splash.
+// Drop sizes follow a power-law distribution (many small, few large).
 // =========================================================================
 function genCalmRain(left, right, totalSamples, sampleRate) {
-  const lpL = new BiquadLP(2800, sampleRate, 0.7);
-  const lpR = new BiquadLP(2800, sampleRate, 0.7);
-  const warmthL = new BiquadBP(650, sampleRate, 1.2);
-  const warmthR = new BiquadBP(650, sampleRate, 1.2);
-  const hpL = new BiquadLP(110, sampleRate, 0.7); // subtract sub-bass
-  const hpR = new BiquadLP(110, sampleRate, 0.7);
+  // Bed shaping: warm, no harsh highs. Sleep-friendly: rolloff above 5.5kHz.
+  const bedLP_L = new BiquadLP(5500, sampleRate, 0.55);
+  const bedLP_R = new BiquadLP(5500, sampleRate, 0.55);
+  const bedHP_L = new BiquadHP(200, sampleRate, 0.7);
+  const bedHP_R = new BiquadHP(200, sampleRate, 0.7);
+  const bedPresence_L = new BiquadBP(900, sampleRate, 0.8);
+  const bedPresence_R = new BiquadBP(900, sampleRate, 0.8);
+  const bedWarmth_L = new BiquadLP(450, sampleRate, 1.0);
+  const bedWarmth_R = new BiquadLP(450, sampleRate, 1.0);
 
-  // Kellet's filter state
-  let b0L = 0, b1L = 0, b2L = 0, b3L = 0, b4L = 0, b5L = 0, b6L = 0;
-  let b0R = 0, b1R = 0, b2R = 0, b3R = 0, b4R = 0, b5R = 0, b6R = 0;
-  let brownL = 0, brownR = 0;
+  const pinkL = new PinkNoise();
+  const pinkR = new PinkNoise();
+  const brownL = new BrownNoise();
+  const brownR = new BrownNoise();
 
-  // Active micro-droplets
-  let activeDropL = 0, dropDecayL = 0;
-  let activeDropR = 0, dropDecayR = 0;
+  // Drop pool — individual resonant droplets
+  const MAX_DROPS = 96;
+  const drops = [];
+  for (let i = 0; i < MAX_DROPS; i++) {
+    drops.push({
+      amp: 0, decay: 0, freq: 0, phase: 0,
+      panL: 0.5, panR: 0.5, noiseAmt: 0, freqGlide: 0
+    });
+  }
 
-  // Active resonant splashes
-  let splashFreqL = 0, splashPhaseL = 0, splashAmpL = 0, splashDecayL = 0;
-  let splashFreqR = 0, splashPhaseR = 0, splashAmpR = 0, splashDecayR = 0;
+  // Splash pool — surface impacts
+  const MAX_SPLASHES = 40;
+  const splashes = [];
+  for (let i = 0; i < MAX_SPLASHES; i++) {
+    splashes.push({ amp: 0, decay: 0, hpState: 0, panL: 0.5, panR: 0.5 });
+  }
 
   for (let i = 0; i < totalSamples; i++) {
-    // --- LAYER A: Continuous Bed ---
-    const wL = Math.random() * 2 - 1;
-    b0L = 0.99886 * b0L + wL * 0.0555179;
-    b1L = 0.99332 * b1L + wL * 0.0750759;
-    b2L = 0.96900 * b2L + wL * 0.1538520;
-    b3L = 0.86650 * b3L + wL * 0.3104856;
-    b4L = 0.55000 * b4L + wL * 0.5329522;
-    b5L = -0.7616 * b5L - wL * 0.0168980;
-    const pinkL = b0L + b1L + b2L + b3L + b4L + b5L + b6L + wL * 0.5362;
-    b6L = wL * 0.115926;
-    brownL = (brownL + 0.03 * wL) / 1.02;
+    // ===== BED (continuous, warm, calming) =====
+    const pL = pinkL.next();
+    const pR = pinkR.next();
+    const bL = brownL.next();
+    const bR = brownR.next();
 
-    const wR = Math.random() * 2 - 1;
-    b0R = 0.99886 * b0R + wR * 0.0555179;
-    b1R = 0.99332 * b1R + wR * 0.0750759;
-    b2R = 0.96900 * b2R + wR * 0.1538520;
-    b3R = 0.86650 * b3R + wR * 0.3104856;
-    b4R = 0.55000 * b4R + wR * 0.5329522;
-    b5R = -0.7616 * b5R - wR * 0.0168980;
-    const pinkR = b0R + b1R + b2R + b3R + b4R + b5R + b6R + wR * 0.5362;
-    b6R = wR * 0.115926;
-    brownR = (brownR + 0.03 * wR) / 1.02;
+    // Mix pink (bright) + brown (warm body) — more brown = warmer rain
+    const rawBedL = pL * 0.55 + bL * 0.45;
+    const rawBedR = pR * 0.55 + bR * 0.45;
 
-    const rawBedL = (pinkL * 0.08 * 0.75) + (brownL * 0.22);
-    const rawBedR = (pinkR * 0.08 * 0.75) + (brownR * 0.22);
+    // Shape: cut sub-rumble, roll off highs, add warm presence
+    const bedL = bedLP_L.process(rawBedL) * 0.55
+               + bedHP_L.process(rawBedL) * 0.35
+               + bedPresence_L.process(rawBedL) * 0.25
+               + bedWarmth_L.process(rawBedL) * 0.40;
+    const bedR = bedLP_R.process(rawBedR) * 0.55
+               + bedHP_R.process(rawBedR) * 0.35
+               + bedPresence_R.process(rawBedR) * 0.25
+               + bedWarmth_R.process(rawBedR) * 0.40;
 
-    const bedL = lpL.process(rawBedL) - hpL.process(rawBedL) * 0.8 + warmthL.process(rawBedL) * 0.35;
-    const bedR = lpR.process(rawBedR) - hpR.process(rawBedR) * 0.8 + warmthR.process(rawBedR) * 0.35;
-
-    // --- LAYER B: Fine Raindrop Patter (Stochastic bursts) ---
-    if (Math.random() < 0.0035) { // ~150 bursts/sec shared
-      activeDropL = (Math.random() * 0.25 + 0.08) * (Math.random() * 2 - 1);
-      dropDecayL = 0.92 + Math.random() * 0.05;
-    }
-    if (Math.random() < 0.0035) {
-      activeDropR = (Math.random() * 0.25 + 0.08) * (Math.random() * 2 - 1);
-      dropDecayR = 0.92 + Math.random() * 0.05;
-    }
-    activeDropL *= dropDecayL;
-    activeDropR *= dropDecayR;
-
-    // --- LAYER C: Subtle Water Splashes (Sparse downward pitch sweeps) ---
-    if (Math.random() < 0.00004) { // ~1.7 splashes/sec
-      splashFreqL = 1200 + Math.random() * 600;
-      splashPhaseL = 0;
-      splashAmpL = 0.09 + Math.random() * 0.06;
-      splashDecayL = 0.985;
-    }
-    if (Math.random() < 0.00004) {
-      splashFreqR = 1200 + Math.random() * 600;
-      splashPhaseR = 0;
-      splashAmpR = 0.09 + Math.random() * 0.06;
-      splashDecayR = 0.985;
+    // ===== DROPS =====
+    // Spawn rate ~180 drops/sec/channel — realistic steady rainfall
+    if (Math.random() < 0.0041) {
+      const d = drops[Math.floor(Math.random() * MAX_DROPS)];
+      // Power-law size distribution: mostly small, occasionally big
+      const size = Math.pow(Math.random(), 2.2);
+      d.amp = (0.06 + size * 0.30) * (0.7 + Math.random() * 0.6);
+      // Larger drops → lower resonance, longer ring
+      d.freq = 3200 - size * 2400 + Math.random() * 500;
+      d.freqGlide = 0.9994 - size * 0.0004;
+      d.decay = 0.9940 - size * 0.0055;
+      d.phase = Math.random() * Math.PI * 2;
+      d.noiseAmt = 0.35 + Math.random() * 0.45;
+      // Random stereo placement
+      const pan = Math.random();
+      d.panL = Math.cos(pan * Math.PI * 0.5);
+      d.panR = Math.sin(pan * Math.PI * 0.5);
     }
 
-    let splashL = 0;
-    if (splashAmpL > 0.001) {
-      splashPhaseL += 2 * Math.PI * splashFreqL / sampleRate;
-      splashFreqL *= 0.9992; // gentle drop downward
-      splashL = Math.sin(splashPhaseL) * splashAmpL;
-      splashAmpL *= splashDecayL;
+    let dropL = 0, dropR = 0;
+    for (let k = 0; k < MAX_DROPS; k++) {
+      const d = drops[k];
+      if (d.amp < 0.00008) continue;
+      d.phase += 2 * Math.PI * d.freq / sampleRate;
+      const body = Math.sin(d.phase) * d.amp;
+      const noise = (Math.random() * 2 - 1) * d.amp * d.noiseAmt * 0.28;
+      const sample = body * 0.75 + noise * 0.25;
+      dropL += sample * d.panL;
+      dropR += sample * d.panR;
+      d.amp *= d.decay;
+      d.freq *= d.freqGlide;
     }
 
-    let splashR = 0;
-    if (splashAmpR > 0.001) {
-      splashPhaseR += 2 * Math.PI * splashFreqR / sampleRate;
-      splashFreqR *= 0.9992;
-      splashR = Math.sin(splashPhaseR) * splashAmpR;
-      splashAmpR *= splashDecayR;
+    // ===== SPLASHES =====
+    if (Math.random() < 0.0009) {
+      const s = splashes[Math.floor(Math.random() * MAX_SPLASHES)];
+      s.amp = 0.10 + Math.random() * 0.18;
+      s.decay = 0.86 + Math.random() * 0.07;
+      const pan = Math.random();
+      s.panL = Math.cos(pan * Math.PI * 0.5);
+      s.panR = Math.sin(pan * Math.PI * 0.5);
     }
 
-    // Blend: Bed (65%) + Patter (25%) + Splash (10%)
-    left[i] = bedL * 0.68 + activeDropL * 0.22 + splashL * 0.10;
-    right[i] = bedR * 0.68 + activeDropR * 0.22 + splashR * 0.10;
+    let splashL = 0, splashR = 0;
+    for (let k = 0; k < MAX_SPLASHES; k++) {
+      const s = splashes[k];
+      if (s.amp < 0.00008) continue;
+      const noise = Math.random() * 2 - 1;
+      s.hpState = s.hpState * 0.72 + noise * 0.28;
+      const hpNoise = noise - s.hpState;
+      const sample = hpNoise * s.amp;
+      splashL += sample * s.panL;
+      splashR += sample * s.panR;
+      s.amp *= s.decay;
+    }
+
+    // ===== MIX: bed dominates (calm), drops add texture =====
+    left[i] = bedL * 0.85 + dropL * 0.55 + splashL * 0.22;
+    right[i] = bedR * 0.85 + dropR * 0.55 + splashR * 0.22;
   }
 }
 
 // =========================================================================
-// 2. CONTINUOUS DEEP OCEAN SWELL (Calibrated to YouTube bn9F19Hi1Lk)
-// "High Quality Stereo Ocean Sounds Of Rolling Waves For Deep Sleeping"
-// - Uninterrupted sub-bass oceanic body (never drops to silence or stops)
-// - Dual staggered wave swells with natural attack, crest, and receding foam
-// - Binaural stereo rolling across the shoreline (Left/Right alternating swells)
-// - Soft, warm foamy spray filtered at 680Hz-850Hz (zero harsh hiss)
+// 2. OCEAN — Deep rolling swells with realistic wave physics
+// Physics: Wave envelope is asymmetric (slow build, fast crest, slow recede).
+// Foam hiss is tied to wave breaking. Sub-bass gives oceanic pressure.
+// Sleep-friendly: cut above 4kHz, warm low-mids, no harsh spray.
 // =========================================================================
 function genCalmOcean(left, right, totalSamples, sampleRate) {
-  const deepLP_L = new BiquadLP(165, sampleRate, 1.1);
-  const deepLP_R = new BiquadLP(165, sampleRate, 1.1);
-  const subPeak_L = new BiquadBP(65, sampleRate, 1.4);
-  const subPeak_R = new BiquadBP(65, sampleRate, 1.4);
-  const surfBP_L = new BiquadBP(680, sampleRate, 1.5);
-  const surfBP_R = new BiquadBP(820, sampleRate, 1.5);
-  const foamLP_L = new BiquadLP(1500, sampleRate, 0.7);
-  const foamLP_R = new BiquadLP(1500, sampleRate, 0.7);
+  // Deep body
+  const deepLP_L = new BiquadLP(160, sampleRate, 1.0);
+  const deepLP_R = new BiquadLP(160, sampleRate, 1.0);
+  const subPeak_L = new BiquadBP(60, sampleRate, 1.3);
+  const subPeak_R = new BiquadBP(62, sampleRate, 1.3);
+  const lowMid_L = new BiquadLP(320, sampleRate, 0.9);
+  const lowMid_R = new BiquadLP(320, sampleRate, 0.9);
 
-  let brownL = 0, brownR = 0;
-  // Pink noise state for foam
-  let p0L = 0, p1L = 0, p2L = 0;
-  let p0R = 0, p1R = 0, p2R = 0;
+  // Foam — soft, rolled off highs
+  const foamBP_L = new BiquadBP(650, sampleRate, 1.0);
+  const foamBP_R = new BiquadBP(720, sampleRate, 1.0);
+  const foamLP_L = new BiquadLP(2000, sampleRate, 0.7);
+  const foamLP_R = new BiquadLP(2000, sampleRate, 0.7);
+  const foamHP_L = new BiquadHP(280, sampleRate, 0.7);
+  const foamHP_R = new BiquadHP(280, sampleRate, 0.7);
+
+  // Wave wet wash (audible water movement)
+  const washBP_L = new BiquadBP(480, sampleRate, 1.6);
+  const washBP_R = new BiquadBP(520, sampleRate, 1.6);
+
+  const brownL = new BrownNoise();
+  const brownR = new BrownNoise();
+  const pinkL = new PinkNoise();
+  const pinkR = new PinkNoise();
+
+  // Multiple overlapping wave periods (prime-ish to avoid lock-in)
+  const P1 = 11.0;
+  const P2 = 13.0;
+  const P3 = 8.5;
+
+  // Asymmetric wave envelope: slow build, sharp crest, slow recede
+  const waveEnv = (phase) => {
+    if (phase < 0.38) {
+      // Build: power curve for natural acceleration
+      return Math.pow(phase / 0.38, 1.7) * 0.82;
+    } else if (phase < 0.52) {
+      // Crest: peak with slight overshoot
+      const c = (phase - 0.38) / 0.14;
+      return 0.82 + Math.sin(c * Math.PI) * 0.18;
+    } else {
+      // Recede: exponential-like fall
+      const r = (phase - 0.52) / 0.48;
+      return Math.pow(1 - r, 1.5) * 0.82;
+    }
+  };
 
   for (let i = 0; i < totalSamples; i++) {
     const t = i / sampleRate;
 
-    // --- SWELL 1: 12-second rolling wave surging primarily left-center ---
-    const phase1 = (t % 12) / 12;
-    // Asymmetric wave shape: slower build (4.5s), broad crest, gentle release
-    const wave1 = Math.pow(Math.sin(phase1 * Math.PI), 1.5);
+    const p1 = (t % P1) / P1;
+    const p2 = ((t + P2 * 0.5) % P2) / P2;
+    const p3 = (t % P3) / P3;
 
-    // --- SWELL 2: 12-second counter-wave offset by 6 seconds surging right-center ---
-    const phase2 = ((t + 6) % 12) / 12;
-    const wave2 = Math.pow(Math.sin(phase2 * Math.PI), 1.5);
+    const wave1 = waveEnv(p1);
+    const wave2 = waveEnv(p2);
+    const wave3 = waveEnv(p3) * 0.6;
 
-    // --- SWELL 3: 8-second background ocean groundswell (keeps continuous motion) ---
-    const phase3 = (t % 8) / 8;
-    const wave3 = 0.5 * (1 - Math.cos(phase3 * Math.PI * 2));
+    // Wave 1 → left, Wave 2 → right, Wave 3 → center
+    const swellL = 0.55 + wave1 * 0.45 + wave2 * 0.18 + wave3 * 0.20;
+    const swellR = 0.55 + wave1 * 0.18 + wave2 * 0.45 + wave3 * 0.20;
 
-    // Continuous baseline: Minimum is ALWAYS >= 0.50 so the ocean NEVER pauses or stops!
-    const totalSwell = 0.50 + 0.35 * wave1 + 0.30 * wave2 + 0.15 * wave3;
+    // ===== DEEP WATER BODY =====
+    const bL = brownL.next();
+    const bR = brownR.next();
 
-    // Deep ocean water body (continuous rolling brownian noise)
-    const wL = Math.random() * 2 - 1;
-    brownL = (brownL + 0.03 * wL) / 1.025;
-    const wR = Math.random() * 2 - 1;
-    brownR = (brownR + 0.03 * wR) / 1.025;
+    const bassL = deepLP_L.process(bL) + subPeak_L.process(bL) * 0.45;
+    const bassR = deepLP_R.process(bR) + subPeak_R.process(bR) * 0.45;
 
-    const rawBassL = brownL * 3.6;
-    const rawBassR = brownR * 3.6;
-    const bassL = deepLP_L.process(rawBassL) + subPeak_L.process(rawBassL) * 0.45;
-    const bassR = deepLP_R.process(rawBassR) + subPeak_R.process(rawBassR) * 0.45;
+    // ===== WET WASH (audible water movement over rocks) =====
+    const wL = pinkL.next();
+    const wR = pinkR.next();
+    // Sweep the wash filter with wave intensity — creates rushing sensation
+    const washL = washBP_L.process(wL) * (0.4 + wave1 * 0.7) * lowMid_L.process(wL) * 0.5;
+    const washR = washBP_R.process(wR) * (0.4 + wave2 * 0.7) * lowMid_R.process(wR) * 0.5;
 
-    // Organic Pink Noise for soft foamy surf spray
-    const nwL = Math.random() * 2 - 1;
-    p0L = 0.997 * p0L + nwL * 0.08;
-    p1L = 0.985 * p1L + nwL * 0.14;
-    p2L = 0.950 * p2L + nwL * 0.28;
-    const pinkL = (p0L + p1L + p2L) * 0.25;
+    // ===== FOAM (wave breaking, soft) =====
+    const foamIntL = Math.pow(Math.max(0, wave1 - 0.25), 1.4) * 0.8
+                   + Math.pow(Math.max(0, wave2 - 0.30), 1.4) * 0.35
+                   + Math.pow(Math.max(0, wave3 - 0.30), 1.4) * 0.25;
+    const foamIntR = Math.pow(Math.max(0, wave1 - 0.30), 1.4) * 0.35
+                   + Math.pow(Math.max(0, wave2 - 0.25), 1.4) * 0.8
+                   + Math.pow(Math.max(0, wave3 - 0.30), 1.4) * 0.25;
 
-    const nwR = Math.random() * 2 - 1;
-    p0R = 0.997 * p0R + nwL * 0.08;
-    p1R = 0.985 * p1R + nwL * 0.14;
-    p2R = 0.950 * p2R + nwL * 0.28;
-    const pinkR = (p0R + p1R + p2R) * 0.25;
+    const foamL = foamLP_L.process(foamBP_L.process(wL * foamIntL)) - foamHP_L.process(wL * foamIntL) * 0.4;
+    const foamR = foamLP_R.process(foamBP_R.process(wR * foamIntR)) - foamHP_R.process(wR * foamIntR) * 0.4;
 
-    // Foam modulation linked to waves cresting
-    const foamEnvL = (0.35 * Math.pow(wave1, 2.0) + 0.15 * Math.pow(wave2, 1.8) + 0.12);
-    const foamEnvR = (0.15 * Math.pow(wave1, 1.8) + 0.35 * Math.pow(wave2, 2.0) + 0.12);
-
-    const foamL = foamLP_L.process(surfBP_L.process(pinkL * foamEnvL) * 2.8);
-    const foamR = foamLP_R.process(surfBP_R.process(pinkR * foamEnvR) * 2.8);
-
-    // Binaural spatial positioning: Wave 1 breaks left-to-center, Wave 2 breaks right-to-center
-    const pan1_L = 0.85; const pan1_R = 0.55;
-    const pan2_L = 0.55; const pan2_R = 0.85;
-
-    const leftSignal = (bassL * 0.72 * totalSwell) + (foamL * 0.45 * pan1_L) + (foamR * 0.25 * pan2_L);
-    const rightSignal = (bassR * 0.72 * totalSwell) + (foamL * 0.25 * pan1_R) + (foamR * 0.45 * pan2_R);
-
-    left[i] = leftSignal;
-    right[i] = rightSignal;
+    // ===== MIX =====
+    // Bass always present (ocean never stops), foam swells with crests
+    left[i] = bassL * 0.45 * swellL + washL * 0.55 + foamL * 1.6;
+    right[i] = bassR * 0.45 * swellR + washR * 0.55 + foamR * 1.6;
   }
 }
 
 // =========================================================================
-// 3. CALMING HIGHLAND WIND (Airy, whispering mountain gusts)
+// 3. WIND — Airy, whispering, with natural gust envelopes
+// Physics: Gust envelopes from overlapping slow oscillations.
+// Turbulence = filtered noise with dynamic filter sweeps.
+// Sleep-friendly: soft high rolloff, warm mid body, no whistle.
 // =========================================================================
 function genCalmWind(left, right, totalSamples, sampleRate) {
-  const bp1_L = new BiquadBP(320, sampleRate, 1.8);
-  const bp1_R = new BiquadBP(360, sampleRate, 1.8);
-  const bp2_L = new BiquadBP(650, sampleRate, 2.2);
-  const bp2_R = new BiquadBP(720, sampleRate, 2.2);
-  const lp_L = new BiquadLP(1100, sampleRate, 0.7);
-  const lp_R = new BiquadLP(1100, sampleRate, 0.7);
+  // Low rumble (cavity/trunk resonance)
+  const rumbleLP_L = new BiquadLP(180, sampleRate, 1.0);
+  const rumbleLP_R = new BiquadLP(180, sampleRate, 1.0);
+  const rumbleBP_L = new BiquadBP(75, sampleRate, 1.4);
+  const rumbleBP_R = new BiquadBP(78, sampleRate, 1.4);
 
-  let noiseL = 0, noiseR = 0;
+  // Mid air (soft whoosh)
+  const midBP_L = new BiquadBP(420, sampleRate, 1.8);
+  const midBP_R = new BiquadBP(480, sampleRate, 1.8);
+
+  // High whisper (rolled off — sleep-friendly, no harsh whistle)
+  const whisperBP_L = new BiquadBP(1400, sampleRate, 2.5);
+  const whisperBP_R = new BiquadBP(1550, sampleRate, 2.5);
+  const whisperLP = new BiquadLP(2800, sampleRate, 0.7);
+
+  // Overall warmth
+  const warmLP_L = new BiquadLP(2000, sampleRate, 0.7);
+  const warmLP_R = new BiquadLP(2000, sampleRate, 0.7);
+
+  let midStateL = 0, midStateR = 0;
+  const brownL = new BrownNoise();
+  const brownR = new BrownNoise();
+  const pinkL = new PinkNoise();
+  const pinkR = new PinkNoise();
 
   for (let i = 0; i < totalSamples; i++) {
     const t = i / sampleRate;
-    const gust1 = 0.5 + 0.4 * Math.sin((t / 24) * Math.PI * 2);
-    const gust2 = 0.3 + 0.25 * Math.sin((t / 12) * Math.PI * 2 + 1.2);
-    const gustEnvelope = Math.max(0.15, (gust1 * 0.65 + gust2 * 0.35));
 
-    const wL = Math.random() * 2 - 1;
-    noiseL = noiseL * 0.88 + wL * 0.12;
-    const wR = Math.random() * 2 - 1;
-    noiseR = noiseR * 0.88 + wR * 0.12;
+    // ===== GUST ENVELOPES (overlapping sines, slow) =====
+    const g1 = 0.5 + 0.5 * Math.sin(t * 0.11);
+    const g2 = 0.5 + 0.5 * Math.sin(t * 0.23 + 1.7);
+    const g3 = 0.5 + 0.5 * Math.sin(t * 0.41 + 3.2);
+    const g4 = 0.5 + 0.5 * Math.sin(t * 0.83 + 0.8);
 
-    const airLowL = bp1_L.process(noiseL) * 2.8;
-    const airLowR = bp1_R.process(noiseR) * 2.8;
-    const airHighL = bp2_L.process(noiseL) * 1.5;
-    const airHighR = bp2_R.process(noiseR) * 1.5;
+    // Weighted sum → organic gusting
+    const gustRaw = 0.30 * g1 + 0.30 * g2 + 0.22 * g3 + 0.18 * g4;
+    // Sharpen slightly (gusts have faster onsets than pure sine)
+    const gust = Math.pow(gustRaw, 1.25);
+    const gustClamped = Math.max(0.18, gust);
 
-    const totalL = lp_L.process(airLowL + airHighL);
-    const totalR = lp_R.process(airLowR + airHighR);
+    // ===== NOISE SOURCES =====
+    const bL = brownL.next();
+    const bR = brownR.next();
+    const pL = pinkL.next();
+    const pR = pinkR.next();
 
-    left[i] = totalL * 1.4 * gustEnvelope;
-    right[i] = totalR * 1.4 * gustEnvelope;
+    // Mid air state (smoothed pink)
+    midStateL = midStateL * 0.90 + pL * 0.10;
+    midStateR = midStateR * 0.90 + pR * 0.10;
+
+    // ===== COMPONENTS =====
+
+    // Low rumble — always present, modulated by gust
+    const rumbleL = rumbleLP_L.process(bL) + rumbleBP_L.process(bL) * 0.5;
+    const rumbleR = rumbleLP_R.process(bR) + rumbleBP_R.process(bR) * 0.5;
+
+    // Mid whoosh — appears during gusts
+    const midIntensity = Math.pow(Math.max(0, gust - 0.28), 1.5) * 2.2;
+    const midL = midBP_L.process(midStateL) * 0.5 * midIntensity;
+    const midR = midBP_R.process(midStateR) * 0.5 * midIntensity;
+
+    // High whisper — only during strong gusts, softly rolled off
+    const whisperIntensity = Math.pow(Math.max(0, gust - 0.50), 2.0) * 2.5;
+    const whisperL = whisperLP.process(whisperBP_L.process(pL)) * 0.22 * whisperIntensity;
+    const whisperR = whisperLP.process(whisperBP_R.process(pR)) * 0.22 * whisperIntensity;
+
+    // ===== MIX =====
+    // Warm overall tone — no harsh frequencies
+    const mixL = rumbleL * 0.55 * (0.5 + gust * 0.5) + midL * 0.65 + whisperL * 0.45;
+    const mixR = rumbleR * 0.55 * (0.5 + gust * 0.5) + midR * 0.65 + whisperR * 0.45;
+
+    left[i] = warmLP_L.process(mixL) * 1.3;
+    right[i] = warmLP_R.process(mixR) * 1.3;
   }
 }
 
 // =========================================================================
-// 4. DEEP TEMPERATE PINE FOREST (Mountain Creek, Pine Wind, Woodpecker & Thrush)
-// Pure Alpine Wilderness: Continuous mountain creek runoff over stones,
-// towering pine canopy wind, rhythmic hollow woodpecker trunk drumming,
-// and pure crystalline European Wood Thrush whistles.
-// ZERO village, ZERO doves, ZERO crows, ZERO koel sounds.
+// 4. FOREST — Mountain creek + pine wind + real birds
 // =========================================================================
 function genCalmForest(left, right, totalSamples, sampleRate) {
-  // Mountain brook filters (active bubbling creek over granite pebbles)
-  const creekLP_L = new BiquadLP(680, sampleRate, 0.85);
-  const creekLP_R = new BiquadLP(680, sampleRate, 0.85);
-  const creekSprayBP_L = new BiquadBP(1100, sampleRate, 1.8);
-  const creekSprayBP_R = new BiquadBP(1250, sampleRate, 1.8);
+  // Creek (bubbling water)
+  const creekRushLP_L = new BiquadLP(800, sampleRate, 0.8);
+  const creekRushLP_R = new BiquadLP(800, sampleRate, 0.8);
+  const creekBubbleBP_L = new BiquadBP(1500, sampleRate, 2.5);
+  const creekBubbleBP_R = new BiquadBP(1650, sampleRate, 2.5);
 
-  // Pine tree canopy wind (deep resonant trunk swaying + high needle whisper)
-  const pineTrunkLP = new BiquadLP(110, sampleRate, 1.4);
-  const pineNeedleBP_L = new BiquadBP(1550, sampleRate, 1.6);
-  const pineNeedleBP_R = new BiquadBP(1750, sampleRate, 1.6);
+  // Pine wind
+  const pineTrunkLP = new BiquadLP(120, sampleRate, 1.3);
+  const pineNeedleBP_L = new BiquadBP(1600, sampleRate, 1.5);
+  const pineNeedleBP_R = new BiquadBP(1800, sampleRate, 1.5);
+  const pineNeedleLP = new BiquadLP(3200, sampleRate, 0.7);
 
-  // Woodpecker hollow trunk resonance filter
-  const woodpeckerBP = new BiquadBP(450, sampleRate, 3.5);
+  // Bird tone shaping
+  const birdLP = new BiquadLP(5500, sampleRate, 0.7);
+  const birdHP = new BiquadHP(1100, sampleRate, 0.7);
 
-  let cL = 0, cR = 0;
-  let pL = 0, pR = 0;
-
-  // Forest delay line for wide alpine space
-  const delaySamples = Math.floor(sampleRate * 0.08);
+  // Forest space (delay)
+  const delaySamples = Math.floor(sampleRate * 0.11);
   const delayBufferL = new Float32Array(delaySamples);
   const delayBufferR = new Float32Array(delaySamples);
   let delayIndex = 0;
 
+  let creekStateL = 0, creekStateR = 0;
+  let pineStateL = 0, pineStateR = 0;
+
+  // Bubble pool (each bubble = short resonant "plink" with pitch rise)
+  const MAX_BUBBLES = 28;
+  const bubbles = [];
+  for (let i = 0; i < MAX_BUBBLES; i++) {
+    bubbles.push({ amp: 0, freq: 0, phase: 0, decay: 0, panL: 0.5, panR: 0.5, rise: 0 });
+  }
+
   for (let i = 0; i < totalSamples; i++) {
     const t = i / sampleRate;
 
-    // --- Active Mountain Brook ---
-    const wL = Math.random() * 2 - 1;
-    cL = cL * 0.82 + wL * 0.18;
-    const wR = Math.random() * 2 - 1;
-    cR = cR * 0.82 + wR * 0.18;
+    // ===== MOUNTAIN CREEK =====
+    const wcL = Math.random() * 2 - 1;
+    creekStateL = creekStateL * 0.86 + wcL * 0.14;
+    const wcR = Math.random() * 2 - 1;
+    creekStateR = creekStateR * 0.86 + wcR * 0.14;
+
+    const flowMod = 0.85 + 0.15 * Math.sin(t * 0.21) + 0.08 * Math.sin(t * 0.53);
+
+    const creekRushL = creekRushLP_L.process(creekStateL) * 1.4 * flowMod;
+    const creekRushR = creekRushLP_R.process(creekStateR) * 1.4 * flowMod;
+
+    // Bubbles: short upward pitch sweeps
+    if (Math.random() < 0.0022) {
+      const b = bubbles[Math.floor(Math.random() * MAX_BUBBLES)];
+      b.amp = 0.05 + Math.random() * 0.10;
+      b.freq = 380 + Math.random() * 700;
+      b.phase = 0;
+      b.decay = 0.986 + Math.random() * 0.008;
+      b.rise = 0.5 + Math.random() * 0.7;
+      const pan = Math.random();
+      b.panL = Math.cos(pan * Math.PI * 0.5);
+      b.panR = Math.sin(pan * Math.PI * 0.5);
+    }
 
     let bubbleL = 0, bubbleR = 0;
-    if (Math.random() < 0.0018) bubbleL = (Math.random() * 0.24 - 0.12);
-    if (Math.random() < 0.0018) bubbleR = (Math.random() * 0.24 - 0.12);
-
-    const creekL = creekLP_L.process(cL) * 0.42 + creekSprayBP_L.process(cL + bubbleL) * 0.26;
-    const creekR = creekLP_R.process(cR) * 0.42 + creekSprayBP_R.process(cR + bubbleR) * 0.26;
-
-    // --- Pine Wind ---
-    const wPineL = Math.random() * 2 - 1;
-    pL = pL * 0.92 + wPineL * 0.08;
-    const wPineR = Math.random() * 2 - 1;
-    pR = pR * 0.92 + wPineR * 0.08;
-
-    const trunkSway = pineTrunkLP.process(pL + pR) * 0.32;
-    const needleL = pineNeedleBP_L.process(pL) * 0.22 * (0.8 + 0.2 * Math.sin(t * 0.35));
-    const needleR = pineNeedleBP_R.process(pR) * 0.22 * (0.8 + 0.2 * Math.cos(t * 0.35));
-
-    // --- Alpine Forest Avian Sounds ---
-    let forestL = 0;
-    let forestR = 0;
-
-    // 1. WOODPECKER DRUMMING (Dry hollow pine trunk drumming: tat-tat-tat-tat-tat)
-    // Burst 1 at t = 2.8s to 3.25s
-    if (t > 2.8 && t < 3.25) {
-      const bT = t - 2.8;
-      const tapInterval = 0.042; // ~24 taps/sec
-      const tapPhase = (bT % tapInterval) / tapInterval;
-      if (tapPhase < 0.25) {
-        const tapEnv = Math.exp(-tapPhase * 18);
-        const impulse = (Math.sin(tapPhase * 450 * Math.PI * 2) + (Math.random() * 0.6 - 0.3)) * tapEnv;
-        const drum = woodpeckerBP.process(impulse) * 0.35;
-        forestR += drum * 0.85;
-        forestL += drum * 0.25;
-      }
-    }
-    // Burst 2 at t = 14.2s to 14.65s
-    if (t > 14.2 && t < 14.65) {
-      const bT = t - 14.2;
-      const tapInterval = 0.044;
-      const tapPhase = (bT % tapInterval) / tapInterval;
-      if (tapPhase < 0.25) {
-        const tapEnv = Math.exp(-tapPhase * 18);
-        const impulse = (Math.sin(tapPhase * 430 * Math.PI * 2) + (Math.random() * 0.6 - 0.3)) * tapEnv;
-        const drum = woodpeckerBP.process(impulse) * 0.30;
-        forestL += drum * 0.85;
-        forestR += drum * 0.25;
-      }
+    for (let k = 0; k < MAX_BUBBLES; k++) {
+      const b = bubbles[k];
+      if (b.amp < 0.00008) continue;
+      b.phase += 2 * Math.PI * b.freq / sampleRate;
+      b.freq *= (1 + b.rise * 0.0007);
+      const sample = Math.sin(b.phase) * b.amp;
+      bubbleL += sample * b.panL;
+      bubbleR += sample * b.panR;
+      b.amp *= b.decay;
     }
 
-    // 2. EUROPEAN WOOD THRUSH & BLACKBIRD FLUTES (Pure high crystal melody)
-    // Phrase 1 (t = 5.8s to 7.8s): Bell-like double-tone flute
-    const thrush1 = (startT, dur, f1, f2) => {
+    // ===== PINE WIND =====
+    const wpL = Math.random() * 2 - 1;
+    pineStateL = pineStateL * 0.94 + wpL * 0.06;
+    const wpR = Math.random() * 2 - 1;
+    pineStateR = pineStateR * 0.94 + wpR * 0.06;
+
+    const gust = 0.65 + 0.35 * Math.sin(t * 0.19) + 0.18 * Math.sin(t * 0.47 + 1.3);
+    const gustClamped = Math.max(0.25, gust);
+
+    const trunkSway = pineTrunkLP.process(pineStateL + pineStateR) * 0.38;
+    const needleL = pineNeedleLP.process(pineNeedleBP_L.process(pineStateL)) * 0.30 * gustClamped;
+    const needleR = pineNeedleLP.process(pineNeedleBP_R.process(pineStateR)) * 0.30 * gustClamped;
+
+    // ===== BIRDS =====
+    let birdL = 0, birdR = 0;
+
+    // Generic bird note: fundamental + harmonics + vibrato + envelope
+    const birdNote = (startT, dur, f0, f1, harmonics, vibRate, vibDepth, amp) => {
       if (t < startT || t > startT + dur) return 0;
       const rT = (t - startT) / dur;
-      const env = Math.pow(Math.sin(rT * Math.PI), 1.3);
-      const freq = f1 + (f2 - f1) * rT;
-      const ph = (t - startT) * freq * Math.PI * 2;
-      // Pure glass flute overtone
-      return (Math.sin(ph) + Math.sin(ph * 2) * 0.12) * env;
+      let env;
+      if (rT < 0.08) env = rT / 0.08;
+      else if (rT < 0.72) env = 1.0;
+      else env = 1.0 - (rT - 0.72) / 0.28;
+      env = Math.max(0, env);
+      const freq = f0 + (f1 - f0) * rT;
+      const vib = 1 + vibDepth * Math.sin((t - startT) * vibRate * Math.PI * 2);
+      const phase = (t - startT) * freq * vib * Math.PI * 2;
+      let sample = 0;
+      for (let h = 0; h < harmonics.length; h++) {
+        sample += Math.sin(phase * (h + 1)) * harmonics[h];
+      }
+      return sample * env * amp;
     };
 
-    forestL += thrush1(5.8, 0.28, 2600, 3150) * 0.32;
-    forestL += thrush1(6.15, 0.24, 3150, 3550) * 0.34;
-    forestL += thrush1(6.46, 0.36, 3550, 2800) * 0.36;
+    // European Robin — bright warbling phrases
+    birdL += birdNote(4.50, 0.20, 4000, 4400, [1.0, 0.28, 0.10], 8, 0.020, 0.24);
+    birdL += birdNote(4.78, 0.15, 4400, 3900, [1.0, 0.24, 0.08], 10, 0.028, 0.22);
+    birdL += birdNote(5.00, 0.24, 3800, 4600, [1.0, 0.32, 0.12], 7, 0.022, 0.26);
+    birdL += birdNote(5.32, 0.17, 4600, 4200, [1.0, 0.26, 0.09], 9, 0.020, 0.22);
+    birdL += birdNote(5.58, 0.32, 4200, 4800, [1.0, 0.30, 0.14], 6, 0.028, 0.28);
 
-    // Phrase 2 (t = 17.0s to 19.0s)
-    forestL += thrush1(17.0, 0.26, 2750, 3250) * 0.32;
-    forestL += thrush1(17.32, 0.28, 3250, 3700) * 0.34;
-    forestL += thrush1(17.68, 0.40, 3700, 2900) * 0.35;
+    // Blackbird — rich flute-like (warm, low)
+    birdR += birdNote(10.20, 0.38, 2500, 2900, [1.0, 0.42, 0.16, 0.06], 5, 0.014, 0.30);
+    birdR += birdNote(10.68, 0.30, 2900, 2400, [1.0, 0.38, 0.13, 0.05], 6, 0.016, 0.28);
+    birdR += birdNote(11.08, 0.44, 2300, 2800, [1.0, 0.44, 0.19, 0.07], 4, 0.012, 0.32);
+    birdR += birdNote(11.62, 0.32, 2800, 2500, [1.0, 0.40, 0.15, 0.05], 5, 0.014, 0.26);
 
-    // 3. GREAT TIT (Bright two-tone "tea-cher, tea-cher" staccato at t = 9.8s to 11.0s)
-    const titNote = (startT, freq) => {
-      if (t < startT || t > startT + 0.15) return 0;
-      const rT = (t - startT) / 0.15;
-      const env = Math.pow(Math.sin(rT * Math.PI), 1.2);
-      const ph = (t - startT) * freq * Math.PI * 2;
-      return Math.sin(ph) * env;
+    // Great Tit — two-tone "tea-cher"
+    const titPair = (startT, f1, f2) => {
+      let s = 0;
+      s += birdNote(startT, 0.13, f1, f1 * 0.94, [1.0, 0.38, 0.10], 12, 0.010, 0.22);
+      s += birdNote(startT + 0.20, 0.13, f2, f2 * 0.94, [1.0, 0.38, 0.10], 12, 0.010, 0.20);
+      return s;
     };
-    forestR += titNote(9.80, 3850) * 0.25;
-    forestR += titNote(10.02, 3350) * 0.22;
-    forestR += titNote(10.35, 3850) * 0.25;
-    forestR += titNote(10.57, 3350) * 0.22;
+    birdR += titPair(16.50, 4000, 3400);
+    birdR += titPair(16.92, 4000, 3400);
+    birdR += titPair(17.34, 4000, 3400);
 
-    // Forest delay
+    // Woodpecker — hollow trunk drumming (impulse + resonant modes)
+    if (t > 7.5 && t < 8.0) {
+      const bT = t - 7.5;
+      const tapInterval = 0.040;
+      const tapPhase = (bT % tapInterval) / tapInterval;
+      if (tapPhase < 0.28) {
+        const tapEnv = Math.exp(-tapPhase * 22);
+        const impulse = (Math.random() * 2 - 1) * tapEnv;
+        const mode1 = Math.sin(bT * 2 * Math.PI * 420) * Math.exp(-tapPhase * 12) * 0.5;
+        const mode2 = Math.sin(bT * 2 * Math.PI * 880) * Math.exp(-tapPhase * 15) * 0.22;
+        const drum = (impulse * 0.55 + mode1 + mode2) * 0.24;
+        birdR += drum * 0.9;
+        birdL += drum * 0.3;
+      }
+    }
+
+    // Bird tone shaping (soften highs, remove rumble)
+    birdL = birdLP.process(birdL) - birdHP.process(birdL) * 0.35;
+    birdR = birdLP.process(birdR) - birdHP.process(birdR) * 0.35;
+
+    // ===== FOREST DELAY =====
     const delL = delayBufferL[delayIndex];
     const delR = delayBufferR[delayIndex];
-    delayBufferL[delayIndex] = forestL + delL * 0.25;
-    delayBufferR[delayIndex] = forestR + delR * 0.25;
+    delayBufferL[delayIndex] = birdL + delL * 0.30;
+    delayBufferR[delayIndex] = birdR + delR * 0.30;
     delayIndex = (delayIndex + 1) % delaySamples;
 
-    left[i] = (creekL + needleL + trunkSway) * 0.75 + forestL + delL * 0.18;
-    right[i] = (creekR + needleR + trunkSway) * 0.75 + forestR + delR * 0.18;
+    // ===== MIX =====
+    left[i] = creekRushL * 0.55 + bubbleL * 0.55 + (needleL + trunkSway) * 0.55 + birdL * 0.70 + delL * 0.18;
+    right[i] = creekRushR * 0.55 + bubbleR * 0.55 + (needleR + trunkSway) * 0.55 + birdR * 0.70 + delR * 0.18;
   }
 }
 
 // =========================================================================
-// 5. HEARTH FIREPLACE (Warm hearth rumble + gentle birch crackles & soft ember pop)
+// 5. FIREPLACE — Combustion roar + flame flicker + wood crackles
 // =========================================================================
 function genCalmFireplace(left, right, totalSamples, sampleRate) {
-  const hearthLP_L = new BiquadLP(250, sampleRate, 1.1);
-  const hearthLP_R = new BiquadLP(250, sampleRate, 1.1);
+  // Combustion roar (low, warm)
+  const roarLP_L = new BiquadLP(160, sampleRate, 0.9);
+  const roarLP_R = new BiquadLP(160, sampleRate, 0.9);
+  const roarBP_L = new BiquadBP(80, sampleRate, 1.2);
+  const roarBP_R = new BiquadBP(82, sampleRate, 1.2);
 
-  let lowL = 0, lowR = 0;
+  // Flame flicker (mid-range, modulated)
+  const flickerBP_L = new BiquadBP(420, sampleRate, 1.4);
+  const flickerBP_R = new BiquadBP(460, sampleRate, 1.4);
+  const flickerLP = new BiquadLP(1400, sampleRate, 0.7);
 
-  for (let i = 0; i < totalSamples; i++) {
-    const wL = Math.random() * 2 - 1;
-    lowL = lowL * 0.95 + wL * 0.05;
-    const wR = Math.random() * 2 - 1;
-    lowR = lowR * 0.95 + wR * 0.04;
+  // Crackle resonance (wood modes)
+  const crackleRes = new BiquadBP(260, sampleRate, 4.0);
 
-    const warmL = hearthLP_L.process(lowL) * 1.5;
-    const warmR = hearthLP_R.process(lowR) * 1.5;
+  const brownL = new BrownNoise();
+  const brownR = new BrownNoise();
+  let flickerStateL = 0, flickerStateR = 0;
 
-    let popL = 0, popR = 0;
-    if (Math.random() < 0.00045) popL = (Math.random() * 0.45 + 0.15) * (Math.random() > 0.5 ? 1 : -1);
-    if (Math.random() < 0.00045) popR = (Math.random() * 0.45 + 0.15) * (Math.random() > 0.5 ? 1 : -1);
-
-    left[i] = warmL * 0.75 + popL * 0.35;
-    right[i] = warmR * 0.75 + popR * 0.35;
+  // Crackle pool
+  const MAX_CRACKLES = 56;
+  const crackles = [];
+  for (let i = 0; i < MAX_CRACKLES; i++) {
+    crackles.push({ amp: 0, phase: 0, freq: 0, decay: 0, panL: 0.5, panR: 0.5, noise: 0 });
   }
-}
 
-// =========================================================================
-// 6. MIDNIGHT MEADOW (Serene summer crickets, warm night resonance, tranquil pulsing)
-// =========================================================================
-function genCalmNight(left, right, totalSamples, sampleRate) {
   for (let i = 0; i < totalSamples; i++) {
     const t = i / sampleRate;
-    const pulse = (Math.sin(t * 13 * Math.PI * 2) > 0 ? 1 : 0) * (0.4 + 0.6 * Math.sin(t * 0.7 * Math.PI * 2));
-    const carrier = Math.sin(t * 4200 * Math.PI * 2) * 0.11;
-    const nightAir = (Math.random() * 2 - 1) * 0.015;
 
-    left[i] = (carrier * pulse * 0.55) + nightAir;
-    right[i] = (carrier * pulse * 0.50) + nightAir;
+    // ===== COMBUSTION ROAR =====
+    const bL = brownL.next();
+    const bR = brownR.next();
+
+    const roarL = roarLP_L.process(bL) + roarBP_L.process(bL) * 0.45;
+    const roarR = roarLP_R.process(bR) + roarBP_R.process(bR) * 0.45;
+
+    // ===== FLAME FLICKER =====
+    const fL = Math.random() * 2 - 1;
+    flickerStateL = flickerStateL * 0.72 + fL * 0.28;
+    const fR = Math.random() * 2 - 1;
+    flickerStateR = flickerStateR * 0.72 + fR * 0.28;
+
+    const flickerModL = 0.5 + 0.5 * Math.sin(t * 43 + Math.sin(t * 11) * 3);
+    const flickerModR = 0.5 + 0.5 * Math.sin(t * 49 + Math.sin(t * 15) * 3);
+
+    const flickerL = flickerLP.process(flickerBP_L.process(flickerStateL)) * 0.30 * flickerModL;
+    const flickerR = flickerLP.process(flickerBP_R.process(flickerStateR)) * 0.30 * flickerModR;
+
+    // ===== CRACKLES =====
+    if (Math.random() < 0.00020) {
+      const c = crackles[Math.floor(Math.random() * MAX_CRACKLES)];
+      const size = Math.pow(Math.random(), 3);
+      c.amp = 0.12 + size * 0.50;
+      c.freq = 180 + Math.random() * 380;
+      c.phase = 0;
+      c.decay = 0.960 + Math.random() * 0.028;
+      c.noise = 0.5 + Math.random() * 0.5;
+      const pan = Math.random();
+      c.panL = Math.cos(pan * Math.PI * 0.5);
+      c.panR = Math.sin(pan * Math.PI * 0.5);
+    }
+
+    // Occasional big ember pop
+    if (Math.random() < 0.000035) {
+      const c = crackles[Math.floor(Math.random() * MAX_CRACKLES)];
+      c.amp = 0.45 + Math.random() * 0.45;
+      c.freq = 120 + Math.random() * 180;
+      c.phase = 0;
+      c.decay = 0.938 + Math.random() * 0.020;
+      c.noise = 0.7;
+      c.panL = 0.65; c.panR = 0.65;
+    }
+
+    let crackleL = 0, crackleR = 0;
+    for (let k = 0; k < MAX_CRACKLES; k++) {
+      const c = crackles[k];
+      if (c.amp < 0.00008) continue;
+      c.phase += 2 * Math.PI * c.freq / sampleRate;
+      const body = Math.sin(c.phase) * c.amp;
+      const noiseBurst = (Math.random() * 2 - 1) * c.amp * c.noise;
+      const sample = body * 0.45 + noiseBurst * 0.55;
+      const filtered = crackleRes.process(sample);
+      crackleL += (sample * 0.6 + filtered * 0.4) * c.panL;
+      crackleR += (sample * 0.6 + filtered * 0.4) * c.panR;
+      c.amp *= c.decay;
+    }
+
+    // ===== MIX =====
+    left[i] = roarL * 0.60 + flickerL * 0.38 + crackleL * 1.0;
+    right[i] = roarR * 0.60 + flickerR * 0.38 + crackleR * 1.0;
   }
 }
 
+// =========================================================================
+// 6. NIGHT — Real cricket chirp trains + katydid + tree frog + night air
+// =========================================================================
+function genCalmNight(left, right, totalSamples, sampleRate) {
+  // Cricket / katydid / frog resonance filters
+  const cricketBP_L = new BiquadBP(4100, sampleRate, 7.0);
+  const cricketBP_R = new BiquadBP(4400, sampleRate, 7.0);
+  const katydidBP_L = new BiquadBP(6300, sampleRate, 5.0);
+  const katydidBP_R = new BiquadBP(6600, sampleRate, 5.0);
+  const frogBP_L = new BiquadBP(2100, sampleRate, 5.0);
+  const frogBP_R = new BiquadBP(2300, sampleRate, 5.0);
+
+  // Night air (soft low ambience)
+  const airLP_L = new BiquadLP(380, sampleRate, 0.7);
+  const airLP_R = new BiquadLP(380, sampleRate, 0.7);
+
+  const brownL = new BrownNoise();
+  const brownR = new BrownNoise();
+
+  // Cricket pool — each has its own chirp train timing
+  const MAX_CRICKETS = 14;
+  const crickets = [];
+  for (let i = 0; i < MAX_CRICKETS; i++) {
+    crickets.push({
+      phase: 0,
+      chirpTimer: Math.random() * 1.5,
+      chirpActive: false,
+      pulseTimer: 0,
+      pulseCount: 0,
+      panL: 0.5,
+      panR: 0.5,
+      baseFreq: 3900 + Math.random() * 900,
+      chirpPeriod: 0.40 + Math.random() * 0.30, // seconds between chirps
+      pulsePeriod: 0.032 + Math.random() * 0.012, // seconds between pulses
+      active: true,
+      wobble: Math.random() * Math.PI * 2,
+    });
+  }
+
+  // Katydid state
+  let katydidPhaseL = 0, katydidPhaseR = 0;
+
+  // Tree frog state
+  let frogPhaseL = 0, frogPhaseR = 0;
+  let frogCallPhase = 0;
+  let frogActive = false;
+
+  for (let i = 0; i < totalSamples; i++) {
+    const t = i / sampleRate;
+
+    // ===== NIGHT AIR (continuous) =====
+    const bL = brownL.next();
+    const bR = brownR.next();
+    const airL = airLP_L.process(bL) * 1.2;
+    const airR = airLP_R.process(bR) * 1.2;
+
+    // ===== CRICKETS =====
+    let cricketL = 0, cricketR = 0;
+
+    for (let k = 0; k < MAX_CRICKETS; k++) {
+      const c = crickets[k];
+
+      // Slow activity gating (some crickets fade in/out over minutes)
+      if (k >= 7) {
+        const activity = Math.sin(t * 0.09 + k * 2.3) + Math.sin(t * 0.21 + k * 1.1);
+        c.active = activity > -0.4;
+      }
+
+      if (!c.active) continue;
+
+      // ===== CHIRP TIMING =====
+      if (!c.chirpActive) {
+        c.chirpTimer -= 1 / sampleRate;
+        if (c.chirpTimer <= 0) {
+          c.chirpActive = true;
+          c.chirpTimer = c.chirpPeriod;
+          c.pulseTimer = 0;
+          c.pulseCount = 0;
+        }
+      } else {
+        c.pulseTimer -= 1 / sampleRate;
+        if (c.pulseTimer <= 0) {
+          c.pulseTimer = c.pulsePeriod;
+          c.pulseCount++;
+          if (c.pulseCount >= 4) {
+            c.chirpActive = false;
+          }
+        }
+      }
+
+      if (c.chirpActive) {
+        // Pulse envelope: short, sharpish attack
+        const pulsePhase = 1 - (c.pulseTimer / c.pulsePeriod);
+        const pulseEnv = Math.max(0, Math.sin(pulsePhase * Math.PI));
+
+        // Carrier with slight wobble
+        const wobble = Math.sin(t * 180 + c.wobble) * 35;
+        const freq = c.baseFreq + wobble;
+        c.phase += 2 * Math.PI * freq / sampleRate;
+
+        // Cricket timbre: sine + 2nd harmonic (buzzy quality)
+        const raw = (Math.sin(c.phase) + Math.sin(c.phase * 2) * 0.35) * pulseEnv * 0.13;
+
+        cricketL += cricketBP_L.process(raw) * c.panL;
+        cricketR += cricketBP_R.process(raw) * c.panR;
+      }
+    }
+
+    // ===== KATYDID (continuous buzzy trill with slow pulse) =====
+    const katydidPulse = 0.5 + 0.5 * Math.sin(t * 2.1);
+    const katydidEnv = 0.25 + 0.75 * Math.pow(katydidPulse, 2);
+
+    katydidPhaseL += 2 * Math.PI * 6400 / sampleRate;
+    katydidPhaseR += 2 * Math.PI * 6700 / sampleRate;
+
+    const katydidRawL = (Math.sin(katydidPhaseL) + 0.45 * Math.sin(katydidPhaseL * 2) + 0.20 * Math.sin(katydidPhaseL * 3)) * 0.06 * katydidEnv;
+    const katydidRawR = (Math.sin(katydidPhaseR) + 0.45 * Math.sin(katydidPhaseR * 2) + 0.20 * Math.sin(katydidPhaseR * 3)) * 0.06 * katydidEnv;
+
+    const katydidL = katydidBP_L.process(katydidRawL) * 0.5;
+    const katydidR = katydidBP_R.process(katydidRawR) * 0.5;
+
+    // ===== TREE FROG =====
+    let frogL = 0, frogR = 0;
+
+    if (!frogActive && Math.random() < 0.00012) {
+      frogActive = true;
+      frogCallPhase = 0;
+    }
+
+    if (frogActive) {
+      frogCallPhase += 1 / (0.18 * sampleRate);
+      if (frogCallPhase >= 1) {
+        frogActive = false;
+      } else {
+        const env = Math.sin(frogCallPhase * Math.PI);
+        const freq = 2250 + Math.sin(frogCallPhase * 4) * 180;
+        frogPhaseL += 2 * Math.PI * freq / sampleRate;
+        frogPhaseR += 2 * Math.PI * (freq + 25) / sampleRate;
+        const rawL = Math.sin(frogPhaseL) * env * 0.15;
+        const rawR = Math.sin(frogPhaseR) * env * 0.15;
+        frogL = frogBP_L.process(rawL) * 0.7;
+        frogR = frogBP_R.process(rawR) * 0.7;
+      }
+    }
+
+    // ===== MIX =====
+    left[i] = airL * 0.45 + cricketL * 1.4 + katydidL * 0.7 + frogL * 0.9;
+    right[i] = airR * 0.45 + cricketR * 1.4 + katydidR * 0.7 + frogR * 0.9;
+  }
+}
+
+// =========================================================================
+// MAIN
+// =========================================================================
 const sounds = [
   { folder: 'rain', file: 'gentle-rain.wav', gen: genCalmRain },
   { folder: 'ocean', file: 'soft-waves.wav', gen: genCalmOcean },
@@ -531,7 +900,7 @@ const sounds = [
   { folder: 'night', file: 'night-insects.wav', gen: genCalmNight },
 ];
 
-console.log('Generating ultra-calming, high-fidelity ambient soundscapes (6 Core Ambient Environments)...');
+console.log('Generating sleep-optimized, ultra-realistic ambient soundscapes...');
 sounds.forEach(({ folder, file, gen }) => {
   const dir = path.join(__dirname, '..', 'public', 'audio', folder);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -540,4 +909,4 @@ sounds.forEach(({ folder, file, gen }) => {
   fs.writeFileSync(filePath, buf);
   console.log(`✓ Generated ${filePath} (${(buf.length / 1024).toFixed(1)} KB)`);
 });
-console.log('All 6 soundscapes successfully synthesized and perfected!');
+console.log('All 6 sleep-optimized soundscapes successfully synthesized!');
