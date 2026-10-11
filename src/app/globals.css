@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --deep-forest: #101816;
+    --moss-slate: #202B28;
+    --moss-elevated: #283633;
+    --sage-mist: #91AFA9;
+    --sage-light: #B4CCC7;
+    --warm-fog: #D8D6C9;
+    --rain-blue: #303E52;
+    --earth-sand: #B6A18A;
+    --text-primary: #F1F3EF;
+    --text-secondary: #B3BDB6;
+    --text-muted: #7E8D86;
+    --border-subtle: rgba(145, 175, 169, 0.14);
+    --border-active: rgba(145, 175, 169, 0.40);
+  }
+
+  body {
+    background-color: var(--deep-forest);
+    color: var(--text-primary);
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+    overflow-x: hidden;
+    selection-background-color: rgba(145, 175, 169, 0.3);
+  }
+
+  ::selection {
+    background-color: rgba(145, 175, 169, 0.3);
+    color: #F1F3EF;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #101816;
+}
+::-webkit-scrollbar-thumb {
+  background: #283633;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #394C48;
+}
+
+/* Custom Range Input Slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(145, 175, 169, 0.2);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: var(--sage-mist);
+  box-shadow: 0 0 10px rgba(145, 175, 169, 0.5);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  transform: scale(1.18);
+  background: #B4CCC7;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(145, 175, 169, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: var(--sage-mist);
+  border: none;
+  box-shadow: 0 0 10px rgba(145, 175, 169, 0.5);
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(32, 43, 40, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(145, 175, 169, 0.12);
+}
+
+.glass-nav {
+  background: rgba(16, 24, 22, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(145, 175, 169, 0.1);
+}
+
+/* Subtle organic aura animation */
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.04);
+  }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 8s ease-in-out infinite;
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float-gentle {
+  animation: floatGentle 5s ease-in-out infinite;
+}
