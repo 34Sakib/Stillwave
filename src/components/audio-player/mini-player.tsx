@@ -14,8 +14,10 @@ import {
   Sliders,
   AlertCircle,
   Loader2,
+  CloudRain,
 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/player-store';
+import { useRainStore } from '@/stores/rain-store';
 import { SleepTimerModal } from '@/components/ui/sleep-timer-modal';
 
 export const MiniPlayer: React.FC = () => {
@@ -185,6 +187,18 @@ export const MiniPlayer: React.FC = () => {
                 aria-label="Master volume"
               />
             </div>
+
+            {/* Tune Rain button if rain is playing or active */}
+            {(activeLayers.rain?.isPlaying || currentSound.id === 'rain') && (
+              <button
+                onClick={() => useRainStore.getState().openCustomizer()}
+                className="p-2 rounded-xl bg-sky-500/15 border border-sky-500/35 text-sky-300 hover:bg-sky-500/25 transition-all"
+                title="Tune Realistic Rain Generator"
+                aria-label="Tune Rain Ambience"
+              >
+                <CloudRain className="w-3.5 h-3.5 text-sky-400" />
+              </button>
+            )}
 
             {/* Sleep Timer button */}
             <button

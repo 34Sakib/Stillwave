@@ -119,41 +119,107 @@ class BiquadBP {
 }
 
 // =========================================================================
-// 1. IMPROVED CALM GENTLE RAIN (Soft, warm, restful patter with zero harsh hiss)
+// 1. REALISTIC CONTINUOUS RAIN (Acoustically calibrated to YouTube eTeD8DAta4c)
+// Layer A: Smooth continuous pink/brown rain bed (warmth peak 650Hz, soft 2.8kHz LP)
+// Layer B: Dense irregular stochastic raindrop patter (Poisson distributed micro-bursts)
+// Layer C: Subtle resonant water droplets and surface splashes
 // =========================================================================
 function genCalmRain(left, right, totalSamples, sampleRate) {
-  const lpL = new BiquadLP(900, sampleRate, 0.7);
-  const lpR = new BiquadLP(900, sampleRate, 0.7);
-  const warmthL = new BiquadLP(350, sampleRate, 0.8);
-  const warmthR = new BiquadLP(350, sampleRate, 0.8);
+  const lpL = new BiquadLP(2800, sampleRate, 0.7);
+  const lpR = new BiquadLP(2800, sampleRate, 0.7);
+  const warmthL = new BiquadBP(650, sampleRate, 1.2);
+  const warmthR = new BiquadBP(650, sampleRate, 1.2);
+  const hpL = new BiquadLP(110, sampleRate, 0.7); // subtract sub-bass
+  const hpR = new BiquadLP(110, sampleRate, 0.7);
 
-  let b0L = 0, b1L = 0, b2L = 0;
-  let b0R = 0, b1R = 0, b2R = 0;
+  // Kellet's filter state
+  let b0L = 0, b1L = 0, b2L = 0, b3L = 0, b4L = 0, b5L = 0, b6L = 0;
+  let b0R = 0, b1R = 0, b2R = 0, b3R = 0, b4R = 0, b5R = 0, b6R = 0;
+  let brownL = 0, brownR = 0;
+
+  // Active micro-droplets
+  let activeDropL = 0, dropDecayL = 0;
+  let activeDropR = 0, dropDecayR = 0;
+
+  // Active resonant splashes
+  let splashFreqL = 0, splashPhaseL = 0, splashAmpL = 0, splashDecayL = 0;
+  let splashFreqR = 0, splashPhaseR = 0, splashAmpR = 0, splashDecayR = 0;
 
   for (let i = 0; i < totalSamples; i++) {
+    // --- LAYER A: Continuous Bed ---
     const wL = Math.random() * 2 - 1;
-    b0L = 0.997 * b0L + wL * 0.07;
-    b1L = 0.985 * b1L + wL * 0.12;
-    b2L = 0.950 * b2L + wL * 0.25;
-    const pinkL = (b0L + b1L + b2L) * 0.22;
+    b0L = 0.99886 * b0L + wL * 0.0555179;
+    b1L = 0.99332 * b1L + wL * 0.0750759;
+    b2L = 0.96900 * b2L + wL * 0.1538520;
+    b3L = 0.86650 * b3L + wL * 0.3104856;
+    b4L = 0.55000 * b4L + wL * 0.5329522;
+    b5L = -0.7616 * b5L - wL * 0.0168980;
+    const pinkL = b0L + b1L + b2L + b3L + b4L + b5L + b6L + wL * 0.5362;
+    b6L = wL * 0.115926;
+    brownL = (brownL + 0.03 * wL) / 1.02;
 
     const wR = Math.random() * 2 - 1;
-    b0R = 0.997 * b0R + wR * 0.07;
-    b1R = 0.985 * b1R + wR * 0.12;
-    b2R = 0.950 * b2R + wR * 0.25;
-    const pinkR = (b0R + b1R + b2R) * 0.22;
+    b0R = 0.99886 * b0R + wR * 0.0555179;
+    b1R = 0.99332 * b1R + wR * 0.0750759;
+    b2R = 0.96900 * b2R + wR * 0.1538520;
+    b3R = 0.86650 * b3R + wR * 0.3104856;
+    b4R = 0.55000 * b4R + wR * 0.5329522;
+    b5R = -0.7616 * b5R - wR * 0.0168980;
+    const pinkR = b0R + b1R + b2R + b3R + b4R + b5R + b6R + wR * 0.5362;
+    b6R = wR * 0.115926;
+    brownR = (brownR + 0.03 * wR) / 1.02;
 
-    const softL = lpL.process(pinkL);
-    const softR = lpR.process(pinkR);
-    const deepL = warmthL.process(pinkL) * 0.8;
-    const deepR = warmthR.process(pinkR) * 0.8;
+    const rawBedL = (pinkL * 0.08 * 0.75) + (brownL * 0.22);
+    const rawBedR = (pinkR * 0.08 * 0.75) + (brownR * 0.22);
 
-    let dropL = 0, dropR = 0;
-    if (Math.random() < 0.0006) dropL = (Math.random() * 0.35 + 0.1) * (Math.random() > 0.5 ? 1 : -1);
-    if (Math.random() < 0.0006) dropR = (Math.random() * 0.35 + 0.1) * (Math.random() > 0.5 ? 1 : -1);
+    const bedL = lpL.process(rawBedL) - hpL.process(rawBedL) * 0.8 + warmthL.process(rawBedL) * 0.35;
+    const bedR = lpR.process(rawBedR) - hpR.process(rawBedR) * 0.8 + warmthR.process(rawBedR) * 0.35;
 
-    left[i] = softL * 0.7 + deepL * 0.3 + dropL * 0.25;
-    right[i] = softR * 0.7 + deepR * 0.3 + dropR * 0.25;
+    // --- LAYER B: Fine Raindrop Patter (Stochastic bursts) ---
+    if (Math.random() < 0.0035) { // ~150 bursts/sec shared
+      activeDropL = (Math.random() * 0.25 + 0.08) * (Math.random() * 2 - 1);
+      dropDecayL = 0.92 + Math.random() * 0.05;
+    }
+    if (Math.random() < 0.0035) {
+      activeDropR = (Math.random() * 0.25 + 0.08) * (Math.random() * 2 - 1);
+      dropDecayR = 0.92 + Math.random() * 0.05;
+    }
+    activeDropL *= dropDecayL;
+    activeDropR *= dropDecayR;
+
+    // --- LAYER C: Subtle Water Splashes (Sparse downward pitch sweeps) ---
+    if (Math.random() < 0.00004) { // ~1.7 splashes/sec
+      splashFreqL = 1200 + Math.random() * 600;
+      splashPhaseL = 0;
+      splashAmpL = 0.09 + Math.random() * 0.06;
+      splashDecayL = 0.985;
+    }
+    if (Math.random() < 0.00004) {
+      splashFreqR = 1200 + Math.random() * 600;
+      splashPhaseR = 0;
+      splashAmpR = 0.09 + Math.random() * 0.06;
+      splashDecayR = 0.985;
+    }
+
+    let splashL = 0;
+    if (splashAmpL > 0.001) {
+      splashPhaseL += 2 * Math.PI * splashFreqL / sampleRate;
+      splashFreqL *= 0.9992; // gentle drop downward
+      splashL = Math.sin(splashPhaseL) * splashAmpL;
+      splashAmpL *= splashDecayL;
+    }
+
+    let splashR = 0;
+    if (splashAmpR > 0.001) {
+      splashPhaseR += 2 * Math.PI * splashFreqR / sampleRate;
+      splashFreqR *= 0.9992;
+      splashR = Math.sin(splashPhaseR) * splashAmpR;
+      splashAmpR *= splashDecayR;
+    }
+
+    // Blend: Bed (65%) + Patter (25%) + Splash (10%)
+    left[i] = bedL * 0.68 + activeDropL * 0.22 + splashL * 0.10;
+    right[i] = bedR * 0.68 + activeDropR * 0.22 + splashR * 0.10;
   }
 }
 

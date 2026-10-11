@@ -12,8 +12,10 @@ import {
   Moon,
   Heart,
   Sliders,
+  CloudRain,
 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/player-store';
+import { useRainStore } from '@/stores/rain-store';
 import { VisualizerCanvas } from './visualizer-canvas';
 import { SleepTimerModal } from '@/components/ui/sleep-timer-modal';
 import { SOUND_TRACKS } from '@/data/sounds';
@@ -161,8 +163,19 @@ export const ListeningRoom: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Auxiliary Toggles: Loop & Sleep Timer & Mixer */}
+                {/* Auxiliary Toggles: Loop & Sleep Timer & Mixer & Tune Rain */}
                 <div className="flex items-center gap-2 flex-wrap">
+                  {(activeLayers.rain?.isPlaying || activeSound.id === 'rain') && (
+                    <button
+                      onClick={() => useRainStore.getState().openCustomizer()}
+                      className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-sky-500/15 border border-sky-500/35 text-sky-300 hover:bg-sky-500/25 text-xs font-medium transition-all shadow-sm"
+                      title="Tune Realistic Rain Generator"
+                    >
+                      <CloudRain className="w-3.5 h-3.5 text-sky-400" />
+                      <span>Tune Rain</span>
+                    </button>
+                  )}
+
                   <button
                     className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-[#202B28] border border-[#91AFA9]/30 text-[#91AFA9] text-xs font-medium cursor-default"
                     title="Seamless Gapless Looping Active"

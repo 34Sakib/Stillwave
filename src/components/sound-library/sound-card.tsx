@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Play, Pause, Plus, Check, Heart } from 'lucide-react';
+import { Play, Pause, Plus, Check, Heart, Sliders } from 'lucide-react';
 import { SoundTrack } from '@/types';
 import { usePlayerStore } from '@/stores/player-store';
+import { useRainStore } from '@/stores/rain-store';
 
 interface SoundCardProps {
   sound: SoundTrack;
@@ -140,6 +141,23 @@ export const SoundCard: React.FC<SoundCardProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Tune Rain Procedural Studio Button */}
+            {sound.id === 'rain' && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  useRainStore.getState().openCustomizer();
+                }}
+                className="px-2.5 py-1.5 rounded-xl text-xs font-medium border border-sky-500/30 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 hover:border-sky-400/50 transition-all flex items-center gap-1.5 shadow-sm"
+                title="Customize realistic rain acoustics, intensity, and patter"
+                aria-label="Open Rain Sound Studio"
+              >
+                <Sliders className="w-3.5 h-3.5 text-sky-400" />
+                <span className="hidden sm:inline">Tune</span>
+              </button>
+            )}
+
             {/* Add to Mixer Button */}
             <button
               onClick={handleMixLayerToggle}

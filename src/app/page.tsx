@@ -9,6 +9,7 @@ import { EditorialSilence } from '@/components/sections/editorial-silence';
 import { RitualSection } from '@/components/sections/ritual-section';
 import { FooterSection } from '@/components/sections/footer-section';
 import { MiniPlayer } from '@/components/audio-player/mini-player';
+import { RainPlayer } from '@/components/audio-player/rain-player';
 
 export default function HomePage() {
   return (
@@ -42,6 +43,9 @@ export default function HomePage() {
 
       {/* Persistent Mini-Player Dock */}
       <MiniPlayer />
+
+      {/* Procedural Rain Sound Customizer Modal */}
+      <RainPlayer />
     </main>
   );
 }

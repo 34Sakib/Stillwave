@@ -1,8 +1,4 @@
-/**
- * Stillwave Autonomous Web Audio Engine
- * Manages AudioContext, HTMLAudioElement sources, gain staging,
- * crossfading, sleep timer fade-outs, and real-time frequency analysis.
- */
+import { rainAudioEngine } from './rain-engine';
 
 interface SoundLayerInstance {
   soundId: string;
@@ -56,6 +52,9 @@ class StillwaveAudioEngine {
       // Connect: Master Gain -> Analyser -> Destination
       this.masterGain.connect(this.analyser);
       this.analyser.connect(this.ctx.destination);
+
+      // Connect Procedural Rain Engine directly to Master Gain
+      await rainAudioEngine.initialize(this.ctx, this.masterGain);
     }
 
     if (this.ctx.state === 'suspended') {
@@ -142,6 +141,18 @@ class StillwaveAudioEngine {
       }
     }
 
+    if (soundId === 'rain') {
+      rainAudioEngine.setVolume(targetVolume);
+      await rainAudioEngine.play();
+      const targetLayer = this.getOrCreateLayer(soundId, audioSrc, targetVolume);
+      targetLayer.userVolume = targetVolume;
+      targetLayer.isMuted = false;
+      targetLayer.isPlaying = true;
+      return;
+    } else {
+      rainAudioEngine.pause();
+    }
+
     // Play target sound
     const targetLayer = this.getOrCreateLayer(soundId, audioSrc, targetVolume);
     targetLayer.userVolume = targetVolume;
@@ -170,6 +181,17 @@ class StillwaveAudioEngine {
    */
   public async startLayer(soundId: string, audioSrc: string, volume = 0.7): Promise<void> {
     await this.ensureContext();
+
+    if (soundId === 'rain') {
+      rainAudioEngine.setVolume(volume);
+      await rainAudioEngine.play();
+      const layer = this.getOrCreateLayer(soundId, audioSrc, volume);
+      layer.userVolume = volume;
+      layer.isMuted = false;
+      layer.isPlaying = true;
+      return;
+    }
+
     const layer = this.getOrCreateLayer(soundId, audioSrc, volume);
     layer.userVolume = volume;
     layer.isMuted = false;
@@ -196,6 +218,9 @@ class StillwaveAudioEngine {
    * Pauses an active sound layer while preserving its playback cursor position.
    */
   public pauseLayer(soundId: string): void {
+    if (soundId === 'rain') {
+      rainAudioEngine.pause();
+    }
     const layer = this.layers.get(soundId);
     if (layer && layer.isPlaying) {
       layer.audio.pause();
@@ -207,6 +232,9 @@ class StillwaveAudioEngine {
    * Stops an active layer and resets its playback cursor to beginning.
    */
   public stopLayer(soundId: string): void {
+    if (soundId === 'rain') {
+      rainAudioEngine.stop();
+    }
     const layer = this.layers.get(soundId);
     if (layer) {
       layer.audio.pause();
@@ -219,6 +247,7 @@ class StillwaveAudioEngine {
    * Pauses all currently playing layers without resetting positions.
    */
   public pauseAll(): void {
+    rainAudioEngine.pause();
     for (const layer of this.layers.values()) {
       if (layer.isPlaying) {
         layer.audio.pause();
@@ -232,8 +261,14 @@ class StillwaveAudioEngine {
    */
   public async resumeAll(): Promise<void> {
     await this.ensureContext();
+    const rainLayer = this.layers.get('rain');
+    if (rainLayer && rainLayer.isPlaying && !rainLayer.isMuted) {
+      rainAudioEngine.setVolume(rainLayer.userVolume);
+      await rainAudioEngine.play();
+    }
+
     for (const layer of this.layers.values()) {
-      if (!layer.isMuted && layer.userVolume > 0) {
+      if (layer.soundId !== 'rain' && !layer.isMuted && layer.userVolume > 0 && layer.isPlaying) {
         try {
           await layer.audio.play();
           layer.isPlaying = true;
@@ -248,6 +283,7 @@ class StillwaveAudioEngine {
    * Stops all layers and resets their playback cursor.
    */
   public stopAll(): void {
+    rainAudioEngine.stop();
     for (const layer of this.layers.values()) {
       layer.audio.pause();
       layer.audio.currentTime = 0;
@@ -259,6 +295,9 @@ class StillwaveAudioEngine {
    * Sets the volume for an individual layer (0.0 to 1.0).
    */
   public setLayerVolume(soundId: string, volume: number): void {
+    if (soundId === 'rain') {
+      rainAudioEngine.setVolume(volume);
+    }
     const layer = this.layers.get(soundId);
     if (!layer) return;
 
@@ -283,6 +322,10 @@ class StillwaveAudioEngine {
 
     layer.isMuted = isMuted;
     const targetVol = isMuted ? 0 : layer.userVolume;
+
+    if (soundId === 'rain') {
+      rainAudioEngine.setVolume(targetVol);
+    }
 
     if (this.ctx && layer.gainNode && layer.gainNode.gain) {
       const currTime = this.ctx.currentTime;
@@ -310,6 +353,10 @@ class StillwaveAudioEngine {
    */
   private fadeOutAndStopLayer(layer: SoundLayerInstance, duration = 0.8): void {
     if (!layer.isPlaying) return;
+
+    if (layer.soundId === 'rain') {
+      rainAudioEngine.pause();
+    }
 
     if (this.ctx && layer.gainNode && layer.gainNode.gain) {
       const currTime = this.ctx.currentTime;
