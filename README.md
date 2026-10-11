@@ -12,9 +12,11 @@ An ultra-refined ambient sound generator and sensory focus web application craft
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 
-[Live Demo](https://stillwave.vercel.app) · [Report Bug](https://github.com/34Sakib/Stillwave/issues) · [Request Feature](https://github.com/34Sakib/Stillwave/issues)
+[Live Demo](https://stillwave-sound.vercel.app/) · [Report Bug](https://github.com/34Sakib/Stillwave/issues) · [Request Feature](https://github.com/34Sakib/Stillwave/issues)
 
 </div>
+
+
 
 ---
 
