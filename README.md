@@ -15,6 +15,7 @@ An ultra-refined ambient sound generator and sensory focus web application craft
 [Live Demo](https://stillwave-sound.vercel.app/) · [Report Bug](https://github.com/34Sakib/Stillwave/issues) · [Request Feature](https://github.com/34Sakib/Stillwave/issues)
 
 </div>
+<img width="1915" height="3404" alt="image" src="https://github.com/user-attachments/assets/6c3c70db-f4a1-4f62-83ec-f26a4861dc7e" />
 
 
 
