@@ -54,7 +54,7 @@ export const SoundCard: React.FC<SoundCardProps> = ({ sound, isActive, isPlaying
     <div
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
-      className={`group relative flex flex-col justify-end w-full h-[380px] rounded-2xl overflow-hidden cursor-pointer select-none border transition-all duration-300 ${
+      className={`group relative flex flex-col justify-end w-full h-[360px] sm:h-[390px] rounded-2xl overflow-hidden cursor-pointer select-none border transition-all duration-300 ${
         isActive
           ? 'border-[#91AFA9] ring-2 ring-[#91AFA9]/30 shadow-2xl scale-[1.02]'
           : 'border-[#91AFA9]/15 hover:border-[#91AFA9]/50 hover:shadow-xl hover:-translate-y-1'
@@ -85,7 +85,7 @@ export const SoundCard: React.FC<SoundCardProps> = ({ sound, isActive, isPlaying
       </div>
 
       {/* Top Floating Badges */}
-      <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
+      <div className="absolute top-3.5 left-3.5 right-3.5 sm:top-4 sm:left-4 sm:right-4 z-10 flex items-center justify-between">
         <span className="px-2.5 py-1 rounded-full text-[10px] uppercase font-mono tracking-wider bg-[#101816]/75 backdrop-blur-md border border-[#91AFA9]/20 text-[#D8D6C9]">
           {sound.category}
         </span>
@@ -105,10 +105,10 @@ export const SoundCard: React.FC<SoundCardProps> = ({ sound, isActive, isPlaying
       </div>
 
       {/* Card Body */}
-      <div className="relative z-10 p-5 space-y-2.5">
+      <div className="relative z-10 p-4 sm:p-5 space-y-2">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-xl font-semibold tracking-wide text-[#F1F3EF] group-hover:text-[#91AFA9] transition-colors">
+            <h3 className="text-lg sm:text-xl font-semibold tracking-wide text-[#F1F3EF] group-hover:text-[#91AFA9] transition-colors">
               {sound.title}
             </h3>
             {isActive && isPlaying && (

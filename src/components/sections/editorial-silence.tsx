@@ -5,8 +5,8 @@ import { Feather } from 'lucide-react';
 
 export const EditorialSilence: React.FC = () => {
   return (
-    <section id="beauty-of-silence" className="py-32 px-5 sm:px-8 max-w-5xl mx-auto">
-      <div className="relative text-center space-y-12">
+    <section id="beauty-of-silence" className="py-20 sm:py-32 px-4 sm:px-8 max-w-5xl mx-auto">
+      <div className="relative text-center space-y-10 sm:space-y-12">
         {/* Subtle decorative acoustic sound wave line */}
         <div className="flex items-center justify-center gap-1.5 opacity-60">
           <div className="w-1.5 h-1.5 rounded-full bg-[#91AFA9]" />
@@ -21,18 +21,18 @@ export const EditorialSilence: React.FC = () => {
           <span className="text-xs uppercase font-mono tracking-widest text-[#91AFA9]">
             06 · Mindful Stillness
           </span>
-          <h2 className="text-3xl sm:text-5xl font-light tracking-tight text-[#F1F3EF] mt-3 font-heading leading-tight">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#F1F3EF] mt-3 font-heading leading-tight px-2">
             The Architecture of Silence
           </h2>
         </div>
 
         {/* Editorial Text Reveal with Generous Whitespace */}
-        <div className="max-w-2xl mx-auto space-y-8 text-base sm:text-lg text-[#B3BDB6] font-light leading-relaxed">
+        <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8 text-sm sm:text-lg text-[#B3BDB6] font-light leading-relaxed px-2">
           <p>
             Silence in the modern world is rarely absolute. It is not the sterile void of an anechoic chamber, but the absence of cognitive friction — the gentle hush that allows your nervous system to exhale.
           </p>
 
-          <blockquote className="my-10 py-6 px-8 rounded-2xl bg-[#202B28]/40 border-l-2 border-[#91AFA9] text-[#F1F3EF] italic font-serif text-xl sm:text-2xl leading-relaxed text-left">
+          <blockquote className="my-8 sm:my-10 py-5 px-5 sm:py-6 sm:px-8 rounded-2xl bg-[#202B28]/40 border-l-2 border-[#91AFA9] text-[#F1F3EF] italic font-serif text-lg sm:text-2xl leading-relaxed text-left">
             “When sound reflects the organic rhythm of the earth, the mind ceases guarding against noise and naturally returns to its center.”
           </blockquote>
 

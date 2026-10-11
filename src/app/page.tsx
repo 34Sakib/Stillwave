@@ -12,7 +12,7 @@ import { MiniPlayer } from '@/components/audio-player/mini-player';
 
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen bg-[#101816] text-[#F1F3EF] flex flex-col pb-28 selection:bg-[#91AFA9]/30">
+    <main className="relative min-h-screen bg-[#101816] text-[#F1F3EF] flex flex-col pb-36 sm:pb-32 selection:bg-[#91AFA9]/30">
       {/* Global Minimalist Navigation */}
       <Navbar />
 

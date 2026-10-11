@@ -58,7 +58,7 @@ export const ListeningRoom: React.FC = () => {
       </div>
 
       {/* Main Glass Player Console */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-[#91AFA9]/20 shadow-2xl relative overflow-hidden">
+      <div className="glass-panel rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 border border-[#91AFA9]/20 shadow-2xl relative overflow-hidden">
         {/* Ambient background glow matching sound tint */}
         <div
           className="absolute -right-20 -bottom-20 w-96 h-96 rounded-full blur-[120px] pointer-events-none opacity-20"
@@ -68,7 +68,7 @@ export const ListeningRoom: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
           {/* Left Column: Artwork & Visualizer */}
           <div className="lg:col-span-5 flex flex-col items-center">
-            <div className="relative w-full max-w-[340px] aspect-square rounded-2xl overflow-hidden border border-[#91AFA9]/25 shadow-2xl group">
+            <div className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-square rounded-2xl overflow-hidden border border-[#91AFA9]/25 shadow-2xl group">
               <Image
                 src={activeSound.artwork}
                 alt={activeSound.title}
@@ -121,7 +121,7 @@ export const ListeningRoom: React.FC = () => {
                 )}
               </div>
 
-              <h3 className="text-3xl sm:text-4xl font-medium tracking-wide text-[#F1F3EF] mt-2 font-heading">
+              <h3 className="text-2xl sm:text-4xl font-medium tracking-wide text-[#F1F3EF] mt-2 font-heading">
                 {activeSound.title}
               </h3>
               <p className="text-sm text-[#91AFA9] font-mono mt-1">
@@ -133,14 +133,14 @@ export const ListeningRoom: React.FC = () => {
             </div>
 
             {/* Transport & Volume Controls */}
-            <div className="p-6 rounded-2xl bg-[#101816]/80 border border-[#91AFA9]/15 space-y-5">
+            <div className="p-4 sm:p-6 rounded-2xl bg-[#101816]/80 border border-[#91AFA9]/15 space-y-5">
               {/* Main Playback Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   {/* Play / Pause Primary Button */}
                   <button
                     onClick={togglePlayPause}
-                    className="p-4 rounded-2xl bg-[#91AFA9] text-[#101816] hover:bg-[#B4CCC7] active:scale-95 transition-all shadow-xl shadow-[#91AFA9]/20 font-medium"
+                    className="p-3.5 sm:p-4 rounded-2xl bg-[#91AFA9] text-[#101816] hover:bg-[#B4CCC7] active:scale-95 transition-all shadow-xl shadow-[#91AFA9]/20 font-medium"
                     aria-label={isPlaying ? 'Pause soundscape' : 'Play soundscape'}
                   >
                     {isPlaying ? (
@@ -153,7 +153,7 @@ export const ListeningRoom: React.FC = () => {
                   {/* Stop Button */}
                   <button
                     onClick={stopPlayback}
-                    className="p-3.5 rounded-2xl bg-[#202B28] text-[#B3BDB6] hover:text-[#F1F3EF] hover:bg-[#283633] border border-[#91AFA9]/20 transition-all active:scale-95"
+                    className="p-3 sm:p-3.5 rounded-2xl bg-[#202B28] text-[#B3BDB6] hover:text-[#F1F3EF] hover:bg-[#283633] border border-[#91AFA9]/20 transition-all active:scale-95"
                     aria-label="Stop playback and reset"
                     title="Stop playback"
                   >
@@ -162,9 +162,9 @@ export const ListeningRoom: React.FC = () => {
                 </div>
 
                 {/* Auxiliary Toggles: Loop & Sleep Timer & Mixer */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
-                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#202B28] border border-[#91AFA9]/30 text-[#91AFA9] text-xs font-medium cursor-default"
+                    className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-[#202B28] border border-[#91AFA9]/30 text-[#91AFA9] text-xs font-medium cursor-default"
                     title="Seamless Gapless Looping Active"
                   >
                     <Repeat className="w-3.5 h-3.5" />
@@ -173,7 +173,7 @@ export const ListeningRoom: React.FC = () => {
 
                   <button
                     onClick={() => setTimerModalOpen(true)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border text-xs font-medium transition-all ${
                       sleepTimer.isRunning
                         ? 'bg-[#91AFA9]/20 border-[#91AFA9] text-[#91AFA9]'
                         : 'bg-[#202B28] border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF]'
@@ -190,7 +190,7 @@ export const ListeningRoom: React.FC = () => {
 
                   <a
                     href="#atmosphere-mixer"
-                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-[#91AFA9]/40 text-xs font-medium transition-all"
+                    className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-[#91AFA9]/40 text-xs font-medium transition-all"
                   >
                     <Sliders className="w-3.5 h-3.5 text-[#91AFA9]" />
                     <span>Mix</span>

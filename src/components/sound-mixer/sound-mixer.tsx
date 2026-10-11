@@ -83,20 +83,20 @@ export const SoundMixer: React.FC = () => {
       </div>
 
       {/* Preset Shortcuts Bar */}
-      <div className="mb-8 p-4 rounded-2xl bg-[#101816]/70 border border-[#91AFA9]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="mb-8 p-3.5 sm:p-4 rounded-2xl bg-[#101816]/70 border border-[#91AFA9]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2 text-xs text-[#B3BDB6]">
           <Layers className="w-4 h-4 text-[#91AFA9]" />
           <span>Quick Sound Recipes:</span>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {INTENTION_PRESETS.map((p) => {
             const isSelected = activePresetId === p.id;
             return (
               <button
                 key={p.id}
                 onClick={() => loadPreset(p)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-xs font-medium border transition-all ${
                   isSelected
                     ? 'bg-[#91AFA9] text-[#101816] border-[#91AFA9] shadow-sm font-semibold'
                     : 'bg-[#202B28] border-[#91AFA9]/20 text-[#D8D6C9] hover:border-[#91AFA9]/40 hover:text-[#F1F3EF]'
@@ -110,7 +110,7 @@ export const SoundMixer: React.FC = () => {
       </div>
 
       {/* 6 Track Channel Fader Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {SOUND_TRACKS.map((snd) => (
           <MixerChannel key={snd.id} sound={snd} />
         ))}

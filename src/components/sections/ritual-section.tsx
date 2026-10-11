@@ -50,26 +50,26 @@ export const RitualSection: React.FC = () => {
   ];
 
   return (
-    <section id="ritual" className="py-24 px-5 sm:px-8 max-w-7xl mx-auto">
+    <section id="ritual" className="py-20 sm:py-24 px-4 sm:px-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-14">
+      <div className="mb-10 sm:mb-14">
         <span className="text-xs uppercase font-mono tracking-widest text-[#91AFA9] block mb-2">
           07 · Daily Habits
         </span>
-        <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-[#F1F3EF] font-heading">
+        <h2 className="text-2xl sm:text-4xl font-light tracking-tight text-[#F1F3EF] font-heading">
           Create Your Daily Ritual
         </h2>
-        <p className="text-sm text-[#B3BDB6] max-w-xl mt-2 leading-relaxed">
+        <p className="text-xs sm:text-sm text-[#B3BDB6] max-w-xl mt-2 leading-relaxed">
           How to weave acoustic sanctuaries into your morning flow, deep work sprints, and evening wind-down.
         </p>
       </div>
 
       {/* Grid of ritual pillars */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {ritualSteps.map((step, idx) => (
           <div
             key={idx}
-            className="p-8 rounded-3xl bg-[#202B28]/60 border border-[#91AFA9]/15 hover:border-[#91AFA9]/40 transition-all flex flex-col justify-between group"
+            className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-[#202B28]/60 border border-[#91AFA9]/15 hover:border-[#91AFA9]/40 transition-all flex flex-col justify-between group"
           >
             <div>
               <div className="flex items-center gap-3 mb-4">

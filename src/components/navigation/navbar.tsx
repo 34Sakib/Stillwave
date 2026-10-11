@@ -81,24 +81,24 @@ export const Navbar: React.FC = () => {
             : 'bg-transparent py-5'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between">
           {/* Logo */}
           <a
             href="#"
-            className="flex items-center gap-2.5 text-[#F1F3EF] hover:opacity-90 transition-opacity group"
+            className="flex items-center gap-2 sm:gap-2.5 text-[#F1F3EF] hover:opacity-90 transition-opacity group"
             aria-label="Stillwave Home"
           >
-            <div className="relative flex items-center justify-center w-7 h-7 rounded-lg bg-[#202B28] border border-[#91AFA9]/30">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#91AFA9] group-hover:scale-125 transition-transform" />
+            <div className="relative flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[#202B28] border border-[#91AFA9]/30">
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#91AFA9] group-hover:scale-125 transition-transform" />
               {isPlaying && (
                 <span className="absolute inset-0 rounded-lg border border-[#91AFA9] animate-ping opacity-40" />
               )}
             </div>
             <div className="flex flex-col">
-              <span className="text-base font-medium tracking-[0.2em] font-heading uppercase">
+              <span className="text-sm sm:text-base font-medium tracking-[0.16em] sm:tracking-[0.2em] font-heading uppercase">
                 Stillwave
               </span>
-              <span className="text-[9px] tracking-widest text-[#B3BDB6] uppercase -mt-1 font-mono">
+              <span className="text-[8px] sm:text-[9px] tracking-widest text-[#B3BDB6] uppercase -mt-0.5 font-mono">
                 Sound Sanctuary
               </span>
             </div>

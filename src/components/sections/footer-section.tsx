@@ -18,14 +18,14 @@ export const FooterSection: React.FC = () => {
   return (
     <footer id="about" className="relative mt-20 border-t border-[#91AFA9]/15 bg-[#101816] text-[#F1F3EF]">
       {/* Closing CTA Banner */}
-      <div className="py-20 px-5 sm:px-8 max-w-5xl mx-auto text-center space-y-6">
+      <div className="py-14 sm:py-20 px-4 sm:px-8 max-w-5xl mx-auto text-center space-y-5 sm:space-y-6">
         <span className="text-xs uppercase font-mono tracking-widest text-[#91AFA9]">
           08 · Quiet Conclusion
         </span>
-        <h2 className="text-3xl sm:text-5xl font-light tracking-tight text-[#F1F3EF] font-heading">
+        <h2 className="text-2xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#F1F3EF] font-heading px-2">
           Take a moment for yourself.
         </h2>
-        <p className="text-sm sm:text-base text-[#B3BDB6] max-w-xl mx-auto leading-relaxed">
+        <p className="text-xs sm:text-base text-[#B3BDB6] max-w-xl mx-auto leading-relaxed px-4">
           Allow the noise of the day to dissipate. Return here whenever you seek stillness, focus, or restorative sleep.
         </p>
 
