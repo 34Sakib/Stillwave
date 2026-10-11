@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Stillwave — Premium Ambient Soundscape Sanctuary',
+  title: 'Stillwave - Premium Ambient Soundscape Sanctuary',
   description: 'A calm, cinematic nature-inspired ambient sound sanctuary for focus, rest, and sleep. Continuous playback, custom multi-track mixing, and restrained atmospheric motion.',
   keywords: ['ambient sounds', 'focus music', 'rain sounds', 'sleep sounds', 'white noise', 'soundscapes', 'relaxation'],
   authors: [{ name: 'Stillwave Sanctuary' }],
