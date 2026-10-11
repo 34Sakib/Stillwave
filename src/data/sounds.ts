@@ -16,14 +16,14 @@ export const SOUND_TRACKS: SoundTrack[] = [
   {
     id: 'ocean',
     title: 'Deep Ocean Swell',
-    subtitle: 'Rolling tide & shore wash',
+    subtitle: 'Continuous rolling waves & deep surf',
     category: 'ocean',
-    description: 'Slow rhythmic pulse of tidal currents rolling against a remote Nordic coastline. Ebb and flow cadence synced for decompression.',
+    description: 'Continuous, non-stop deep ocean swells with rhythmic rolling waves, gentle foamy crests, and an uninterrupted deep-water undercurrent.',
     moodTags: ['Sleep', 'Decompress', 'Calm'],
     audioSrc: '/audio/ocean/soft-waves.wav',
     artwork: '/images/soundscapes/ocean.jpg',
     tintColor: '#284654',
-    defaultVolume: 0.70,
+    defaultVolume: 0.75,
   },
   {
     id: 'forest',

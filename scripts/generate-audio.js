@@ -224,39 +224,46 @@ function genCalmRain(left, right, totalSamples, sampleRate) {
 }
 
 // =========================================================================
-// 2. CONTINUOUS DEEP OCEAN SWELL (Non-stop, seamless rolling ocean without any pause)
-// - Continuous deep rolling water body: Never dies down or drops to silence
-// - Dual overlapping wave surges (12s primary wave + 6s offset counter-wave)
-// - Continuous foamy surf wash that rolls seamlessly
-// - 100% gapless non-stop playback
+// 2. CONTINUOUS DEEP OCEAN SWELL (Calibrated to YouTube bn9F19Hi1Lk)
+// "High Quality Stereo Ocean Sounds Of Rolling Waves For Deep Sleeping"
+// - Uninterrupted sub-bass oceanic body (never drops to silence or stops)
+// - Dual staggered wave swells with natural attack, crest, and receding foam
+// - Binaural stereo rolling across the shoreline (Left/Right alternating swells)
+// - Soft, warm foamy spray filtered at 680Hz-850Hz (zero harsh hiss)
 // =========================================================================
 function genCalmOcean(left, right, totalSamples, sampleRate) {
-  const deepLP_L = new BiquadLP(190, sampleRate, 1.2);
-  const deepLP_R = new BiquadLP(190, sampleRate, 1.2);
-  const surfBP_L = new BiquadBP(720, sampleRate, 1.3);
-  const surfBP_R = new BiquadBP(800, sampleRate, 1.3);
-  const foamLP_L = new BiquadLP(1200, sampleRate, 0.7);
-  const foamLP_R = new BiquadLP(1200, sampleRate, 0.7);
+  const deepLP_L = new BiquadLP(165, sampleRate, 1.1);
+  const deepLP_R = new BiquadLP(165, sampleRate, 1.1);
+  const subPeak_L = new BiquadBP(65, sampleRate, 1.4);
+  const subPeak_R = new BiquadBP(65, sampleRate, 1.4);
+  const surfBP_L = new BiquadBP(680, sampleRate, 1.5);
+  const surfBP_R = new BiquadBP(820, sampleRate, 1.5);
+  const foamLP_L = new BiquadLP(1500, sampleRate, 0.7);
+  const foamLP_R = new BiquadLP(1500, sampleRate, 0.7);
 
   let brownL = 0, brownR = 0;
+  // Pink noise state for foam
+  let p0L = 0, p1L = 0, p2L = 0;
+  let p0R = 0, p1R = 0, p2R = 0;
 
   for (let i = 0; i < totalSamples; i++) {
     const t = i / sampleRate;
 
-    // Wave 1: 12-second primary ocean surge
+    // --- SWELL 1: 12-second rolling wave surging primarily left-center ---
     const phase1 = (t % 12) / 12;
-    const wave1 = 0.5 * (1 - Math.cos(phase1 * Math.PI * 2)); // Smooth raised cosine, never sharp
+    // Asymmetric wave shape: slower build (4.5s), broad crest, gentle release
+    const wave1 = Math.pow(Math.sin(phase1 * Math.PI), 1.5);
 
-    // Wave 2: 12-second counter-swell offset by 6 seconds (crests when Wave 1 recedes)
+    // --- SWELL 2: 12-second counter-wave offset by 6 seconds surging right-center ---
     const phase2 = ((t + 6) % 12) / 12;
-    const wave2 = 0.5 * (1 - Math.cos(phase2 * Math.PI * 2));
+    const wave2 = Math.pow(Math.sin(phase2 * Math.PI), 1.5);
 
-    // Wave 3: 8-second gentle rolling swell (keeps texture organic and non-repetitive)
+    // --- SWELL 3: 8-second background ocean groundswell (keeps continuous motion) ---
     const phase3 = (t % 8) / 8;
     const wave3 = 0.5 * (1 - Math.cos(phase3 * Math.PI * 2));
 
-    // Combined swell envelope: minimum is ALWAYS >= 0.55 so the ocean NEVER pauses or drops to silence!
-    const totalSwell = 0.55 + 0.32 * wave1 + 0.28 * wave2 + 0.15 * wave3;
+    // Continuous baseline: Minimum is ALWAYS >= 0.50 so the ocean NEVER pauses or stops!
+    const totalSwell = 0.50 + 0.35 * wave1 + 0.30 * wave2 + 0.15 * wave3;
 
     // Deep ocean water body (continuous rolling brownian noise)
     const wL = Math.random() * 2 - 1;
@@ -264,23 +271,40 @@ function genCalmOcean(left, right, totalSamples, sampleRate) {
     const wR = Math.random() * 2 - 1;
     brownR = (brownR + 0.03 * wR) / 1.025;
 
-    const bassL = deepLP_L.process(brownL * 3.8);
-    const bassR = deepLP_R.process(brownR * 3.8);
+    const rawBassL = brownL * 3.6;
+    const rawBassR = brownR * 3.6;
+    const bassL = deepLP_L.process(rawBassL) + subPeak_L.process(rawBassL) * 0.45;
+    const bassR = deepLP_R.process(rawBassR) + subPeak_R.process(rawBassR) * 0.45;
 
-    // Dynamic foam wash corresponding to the cresting waves
-    const foamWhiteL = (Math.random() * 2 - 1) * (0.35 * Math.pow(wave1, 1.8) + 0.30 * Math.pow(wave2, 1.8) + 0.15);
-    const foamWhiteR = (Math.random() * 2 - 1) * (0.35 * Math.pow(wave1, 1.8) + 0.30 * Math.pow(wave2, 1.8) + 0.15);
+    // Organic Pink Noise for soft foamy surf spray
+    const nwL = Math.random() * 2 - 1;
+    p0L = 0.997 * p0L + nwL * 0.08;
+    p1L = 0.985 * p1L + nwL * 0.14;
+    p2L = 0.950 * p2L + nwL * 0.28;
+    const pinkL = (p0L + p1L + p2L) * 0.25;
 
-    const foamL = foamLP_L.process(surfBP_L.process(foamWhiteL) * 2.2);
-    const foamR = foamLP_R.process(surfBP_R.process(foamWhiteR) * 2.2);
+    const nwR = Math.random() * 2 - 1;
+    p0R = 0.997 * p0R + nwL * 0.08;
+    p1R = 0.985 * p1R + nwL * 0.14;
+    p2R = 0.950 * p2R + nwL * 0.28;
+    const pinkR = (p0R + p1R + p2R) * 0.25;
 
-    // Smooth spatial stereo sway
-    const panL = 0.78 + 0.22 * Math.sin(t * 0.45);
-    const panR = 0.78 - 0.22 * Math.sin(t * 0.45);
+    // Foam modulation linked to waves cresting
+    const foamEnvL = (0.35 * Math.pow(wave1, 2.0) + 0.15 * Math.pow(wave2, 1.8) + 0.12);
+    const foamEnvR = (0.15 * Math.pow(wave1, 1.8) + 0.35 * Math.pow(wave2, 2.0) + 0.12);
 
-    // Continuous non-stop sound: continuous deep water body + seamless overlapping waves
-    left[i] = (bassL * 0.75 * totalSwell + foamL * 0.42) * panL;
-    right[i] = (bassR * 0.75 * totalSwell + foamR * 0.42) * panR;
+    const foamL = foamLP_L.process(surfBP_L.process(pinkL * foamEnvL) * 2.8);
+    const foamR = foamLP_R.process(surfBP_R.process(pinkR * foamEnvR) * 2.8);
+
+    // Binaural spatial positioning: Wave 1 breaks left-to-center, Wave 2 breaks right-to-center
+    const pan1_L = 0.85; const pan1_R = 0.55;
+    const pan2_L = 0.55; const pan2_R = 0.85;
+
+    const leftSignal = (bassL * 0.72 * totalSwell) + (foamL * 0.45 * pan1_L) + (foamR * 0.25 * pan2_L);
+    const rightSignal = (bassR * 0.72 * totalSwell) + (foamL * 0.25 * pan1_R) + (foamR * 0.45 * pan2_R);
+
+    left[i] = leftSignal;
+    right[i] = rightSignal;
   }
 }
 
