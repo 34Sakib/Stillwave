@@ -13,7 +13,7 @@ import { RainPlayer } from '@/components/audio-player/rain-player';
 
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen bg-[#101816] text-[#F1F3EF] flex flex-col pb-36 sm:pb-32 selection:bg-[#91AFA9]/30">
+    <main className="relative min-h-screen bg-transparent text-[#F1F3EF] flex flex-col pb-36 sm:pb-32 transition-colors duration-1000">
       {/* Global Minimalist Navigation */}
       <Navbar />
 

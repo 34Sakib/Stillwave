@@ -48,7 +48,7 @@ export const SoundMixer: React.FC = () => {
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div>
-          <span className="text-xs uppercase font-mono tracking-widest text-[#91AFA9] block mb-2">
+          <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] block mb-2 transition-colors duration-1000">
             04 · Multi-Track Engine
           </span>
           <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-[#F1F3EF] font-heading">
@@ -64,7 +64,7 @@ export const SoundMixer: React.FC = () => {
           <button
             onClick={() => setSaveModalOpen(true)}
             disabled={playingLayersCount === 0}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#91AFA9] text-[#101816] hover:bg-[#B4CCC7] disabled:opacity-40 disabled:cursor-not-allowed font-medium text-xs transition-all shadow-md active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--theme-accent,#91AFA9)] text-[#101816] hover:bg-[var(--theme-accent-hover,#B4CCC7)] disabled:opacity-40 disabled:cursor-not-allowed font-medium text-xs transition-all shadow-md active:scale-95"
             title="Save your current audio layer combination"
           >
             <BookmarkPlus className="w-4 h-4" />
@@ -73,7 +73,7 @@ export const SoundMixer: React.FC = () => {
 
           <button
             onClick={resetMix}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-[#91AFA9]/40 font-medium text-xs transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-[var(--theme-border-active,rgba(145,175,169,0.4))] font-medium text-xs transition-all active:scale-95"
             title="Reset all tracks to silence"
           >
             <RotateCcw className="w-4 h-4" />
@@ -83,9 +83,9 @@ export const SoundMixer: React.FC = () => {
       </div>
 
       {/* Preset Shortcuts Bar */}
-      <div className="mb-8 p-3.5 sm:p-4 rounded-2xl bg-[#101816]/70 border border-[#91AFA9]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="mb-8 p-3.5 sm:p-4 rounded-2xl bg-[var(--theme-bg,#101816)]/70 border border-[var(--theme-border-subtle,rgba(145,175,169,0.15))] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-colors duration-1000">
         <div className="flex items-center gap-2 text-xs text-[#B3BDB6]">
-          <Layers className="w-4 h-4 text-[#91AFA9]" />
+          <Layers className="w-4 h-4 text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
           <span>Quick Sound Recipes:</span>
         </div>
 
@@ -98,8 +98,8 @@ export const SoundMixer: React.FC = () => {
                 onClick={() => loadPreset(p)}
                 className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-xs font-medium border transition-all ${
                   isSelected
-                    ? 'bg-[#91AFA9] text-[#101816] border-[#91AFA9] shadow-sm font-semibold'
-                    : 'bg-[#202B28] border-[#91AFA9]/20 text-[#D8D6C9] hover:border-[#91AFA9]/40 hover:text-[#F1F3EF]'
+                    ? 'bg-[var(--theme-accent,#91AFA9)] text-[#101816] border-[var(--theme-accent,#91AFA9)] shadow-sm font-semibold'
+                    : 'bg-[var(--theme-surface,#202B28)] border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#D8D6C9] hover:border-[var(--theme-border-active,rgba(145,175,169,0.4))] hover:text-[#F1F3EF]'
                 }`}
               >
                 {p.title}

@@ -89,10 +89,10 @@ export const Navbar: React.FC = () => {
             className="flex items-center gap-2 sm:gap-2.5 text-[#F1F3EF] hover:opacity-90 transition-opacity group"
             aria-label="Stillwave Home"
           >
-            <div className="relative flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[#202B28] border border-[#91AFA9]/30">
-              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#91AFA9] group-hover:scale-125 transition-transform" />
+            <div className="relative flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.3))] transition-colors duration-1000">
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[var(--theme-accent,#91AFA9)] group-hover:scale-125 transition-all duration-700" />
               {isPlaying && (
-                <span className="absolute inset-0 rounded-lg border border-[#91AFA9] animate-ping opacity-40" />
+                <span className="absolute inset-0 rounded-lg border border-[var(--theme-accent,#91AFA9)] animate-ping opacity-40" />
               )}
             </div>
             <div className="flex flex-col">
@@ -114,7 +114,7 @@ export const Navbar: React.FC = () => {
                 className="hover:text-[#F1F3EF] transition-colors py-1 relative group"
               >
                 {link.label}
-                <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#91AFA9] transition-all group-hover:w-full" />
+                <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[var(--theme-accent,#91AFA9)] transition-all group-hover:w-full" />
               </a>
             ))}
           </nav>
@@ -126,8 +126,8 @@ export const Navbar: React.FC = () => {
               onClick={() => setTimerModalOpen(true)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                 sleepTimer.isRunning
-                  ? 'bg-[#91AFA9]/15 border-[#91AFA9] text-[#91AFA9] animate-pulse'
-                  : 'bg-[#202B28]/80 border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-[#91AFA9]/40'
+                  ? 'bg-[var(--theme-accent,#91AFA9)]/15 border-[var(--theme-accent,#91AFA9)] text-[var(--theme-accent,#91AFA9)] animate-pulse'
+                  : 'bg-[var(--theme-surface,#202B28)]/80 border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-[var(--theme-border-active,rgba(145,175,169,0.4))]'
               }`}
               title="Sleep Timer"
               aria-label="Configure Sleep Timer"
@@ -145,8 +145,8 @@ export const Navbar: React.FC = () => {
               onClick={togglePlayPause}
               className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                 isPlaying
-                  ? 'bg-[#91AFA9] text-[#101816] border-[#91AFA9] shadow-sm'
-                  : 'bg-[#202B28]/80 border-[#91AFA9]/20 text-[#F1F3EF] hover:border-[#91AFA9]/40'
+                  ? 'bg-[var(--theme-accent,#91AFA9)] text-[#101816] border-[var(--theme-accent,#91AFA9)] shadow-sm'
+                  : 'bg-[var(--theme-surface,#202B28)]/80 border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#F1F3EF] hover:border-[var(--theme-border-active,rgba(145,175,169,0.4))]'
               }`}
               title="Toggle Play / Pause"
               aria-label={isPlaying ? 'Pause playback' : 'Start playback'}

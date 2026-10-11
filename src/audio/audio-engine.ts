@@ -141,17 +141,7 @@ class StillwaveAudioEngine {
       }
     }
 
-    if (soundId === 'rain') {
-      rainAudioEngine.setVolume(targetVolume);
-      await rainAudioEngine.play();
-      const targetLayer = this.getOrCreateLayer(soundId, audioSrc, targetVolume);
-      targetLayer.userVolume = targetVolume;
-      targetLayer.isMuted = false;
-      targetLayer.isPlaying = true;
-      return;
-    } else {
-      rainAudioEngine.pause();
-    }
+    rainAudioEngine.pause();
 
     // Play target sound
     const targetLayer = this.getOrCreateLayer(soundId, audioSrc, targetVolume);
@@ -181,16 +171,6 @@ class StillwaveAudioEngine {
    */
   public async startLayer(soundId: string, audioSrc: string, volume = 0.7): Promise<void> {
     await this.ensureContext();
-
-    if (soundId === 'rain') {
-      rainAudioEngine.setVolume(volume);
-      await rainAudioEngine.play();
-      const layer = this.getOrCreateLayer(soundId, audioSrc, volume);
-      layer.userVolume = volume;
-      layer.isMuted = false;
-      layer.isPlaying = true;
-      return;
-    }
 
     const layer = this.getOrCreateLayer(soundId, audioSrc, volume);
     layer.userVolume = volume;
@@ -261,14 +241,9 @@ class StillwaveAudioEngine {
    */
   public async resumeAll(): Promise<void> {
     await this.ensureContext();
-    const rainLayer = this.layers.get('rain');
-    if (rainLayer && rainLayer.isPlaying && !rainLayer.isMuted) {
-      rainAudioEngine.setVolume(rainLayer.userVolume);
-      await rainAudioEngine.play();
-    }
 
     for (const layer of this.layers.values()) {
-      if (layer.soundId !== 'rain' && !layer.isMuted && layer.userVolume > 0 && layer.isPlaying) {
+      if (!layer.isMuted && layer.userVolume > 0 && layer.isPlaying) {
         try {
           await layer.audio.play();
           layer.isPlaying = true;

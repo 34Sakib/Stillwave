@@ -38,19 +38,22 @@ export const HeroSection: React.FC = () => {
       </div>
 
       {/* Floating Organic Aura Accent */}
-      <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#91AFA9]/10 blur-[130px] pointer-events-none animate-soft-pulse" />
+      <div
+        className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-[130px] pointer-events-none animate-soft-pulse transition-all duration-1000"
+        style={{ background: 'var(--theme-glow, rgba(145, 175, 169, 0.16))' }}
+      />
 
       {/* Hero Content */}
       <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
         {/* Subtle pill tag */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#202B28]/80 border border-[#91AFA9]/25 backdrop-blur-md text-xs font-mono tracking-widest text-[#D8D6C9] uppercase shadow-lg">
-          <Sparkles className="w-3.5 h-3.5 text-[#91AFA9]" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--theme-surface,#202B28)]/80 border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] backdrop-blur-md text-xs font-mono tracking-widest text-[#D8D6C9] uppercase shadow-lg transition-colors duration-1000">
+          <Sparkles className="w-3.5 h-3.5 text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
           <span>Continuous Ambient Sound Sanctuary</span>
         </div>
 
         {/* Headline */}
         <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-[#F1F3EF] font-heading leading-[1.08] px-2">
-          Find Your <span className="italic font-serif text-[#91AFA9]">Quiet</span>.
+          Find Your <span className="italic font-serif text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000">Quiet</span>.
         </h1>
 
         {/* Subheading */}
@@ -62,7 +65,10 @@ export const HeroSection: React.FC = () => {
         <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto">
           <button
             onClick={handleStartListening}
-            className="w-full sm:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-2xl bg-[#91AFA9] hover:bg-[#B4CCC7] text-[#101816] font-medium text-sm tracking-wide transition-all shadow-xl shadow-[#91AFA9]/15 flex items-center justify-center gap-3 group active:scale-95"
+            className="w-full sm:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-2xl bg-[var(--theme-accent,#91AFA9)] hover:bg-[var(--theme-accent-hover,#B4CCC7)] text-[#101816] font-medium text-sm tracking-wide transition-all shadow-xl flex items-center justify-center gap-3 group active:scale-95"
+            style={{
+              boxShadow: '0 10px 25px -5px rgba(var(--theme-accent-rgb, 145, 175, 169), 0.25)',
+            }}
             aria-label={isPlaying ? 'Pause current soundscape' : 'Start listening to ambient soundscape'}
           >
             {isPlaying ? (
@@ -80,17 +86,17 @@ export const HeroSection: React.FC = () => {
 
           <a
             href="#soundscapes"
-            className="w-full sm:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-2xl bg-[#202B28]/90 hover:bg-[#283633] text-[#F1F3EF] border border-[#91AFA9]/25 hover:border-[#91AFA9]/50 font-medium text-sm tracking-wide transition-all backdrop-blur-md flex items-center justify-center gap-2.5 active:scale-95"
+            className="w-full sm:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-2xl bg-[var(--theme-surface,#202B28)]/90 hover:bg-[var(--theme-elevated,#283633)] text-[#F1F3EF] border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] hover:border-[var(--theme-border-active,rgba(145,175,169,0.5))] font-medium text-sm tracking-wide transition-all backdrop-blur-md flex items-center justify-center gap-2.5 active:scale-95"
           >
-            <Compass className="w-4 h-4 text-[#91AFA9]" />
+            <Compass className="w-4 h-4 text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
             <span>Explore Sounds</span>
           </a>
         </div>
 
         {/* Sound Status Micro-Badge */}
         {isPlaying && currentSound && (
-          <div className="pt-4 sm:pt-6 animate-fade-in inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#101816]/80 border border-[#91AFA9]/30 backdrop-blur-md text-[11px] sm:text-xs text-[#D8D6C9]">
-            <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#91AFA9] animate-pulse" />
+          <div className="pt-4 sm:pt-6 animate-fade-in inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[var(--theme-bg,#101816)]/80 border border-[var(--theme-border-active,rgba(145,175,169,0.3))] backdrop-blur-md text-[11px] sm:text-xs text-[#D8D6C9] transition-colors duration-1000">
+            <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--theme-accent,#91AFA9)] animate-pulse transition-colors duration-1000" />
             <span>Listening to <strong className="text-[#F1F3EF] font-medium">{currentSound.title}</strong></span>
           </div>
         )}

@@ -2,7 +2,20 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Play, Pause, Plus, Check, Heart, Sliders } from 'lucide-react';
+import {
+  Play,
+  Pause,
+  Plus,
+  Check,
+  Heart,
+  Sliders,
+  CloudRain,
+  Waves,
+  Trees,
+  Flame,
+  Wind,
+  Moon,
+} from 'lucide-react';
 import { SoundTrack } from '@/types';
 import { usePlayerStore } from '@/stores/player-store';
 import { useRainStore } from '@/stores/rain-store';
@@ -12,6 +25,25 @@ interface SoundCardProps {
   isActive: boolean;
   isPlaying: boolean;
 }
+
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'rain':
+      return <CloudRain className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    case 'ocean':
+      return <Waves className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    case 'forest':
+      return <Trees className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    case 'fireplace':
+      return <Flame className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    case 'wind':
+      return <Wind className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    case 'night':
+      return <Moon className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    default:
+      return null;
+  }
+};
 
 export const SoundCard: React.FC<SoundCardProps> = ({
   sound,
@@ -51,10 +83,10 @@ export const SoundCard: React.FC<SoundCardProps> = ({
   return (
     <div
       onClick={handleCardClick}
-      className={`group relative flex flex-col justify-end w-full h-[360px] sm:h-[390px] md:h-[420px] rounded-2xl overflow-hidden cursor-pointer select-none border transition-all duration-300 ${
+      className={`group relative flex flex-col justify-end w-full h-[360px] sm:h-[390px] md:h-[420px] rounded-2xl overflow-hidden cursor-pointer select-none border transition-all duration-500 ${
         isActive
-          ? 'border-[#91AFA9] ring-2 ring-[#91AFA9]/30 shadow-2xl scale-[1.01]'
-          : 'border-[#91AFA9]/15 hover:border-[#91AFA9]/50 hover:shadow-xl hover:-translate-y-1'
+          ? 'border-[var(--theme-accent,#91AFA9)] ring-2 ring-[var(--theme-accent,#91AFA9)]/30 shadow-2xl scale-[1.01]'
+          : 'border-[var(--theme-border-subtle,rgba(145,175,169,0.15))] hover:border-[var(--theme-border-active,rgba(145,175,169,0.5))] hover:shadow-xl hover:-translate-y-1'
       }`}
       role="button"
       tabIndex={0}
@@ -83,8 +115,9 @@ export const SoundCard: React.FC<SoundCardProps> = ({
 
       {/* Top Floating Badges */}
       <div className="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-4 z-10 flex items-center justify-between pointer-events-none">
-        <span className="px-2.5 py-1 rounded-full text-[10px] uppercase font-mono tracking-wider bg-[#101816]/85 backdrop-blur-md border border-[#91AFA9]/25 text-[#D8D6C9] pointer-events-auto">
-          {sound.category}
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] uppercase font-mono tracking-wider bg-[#101816]/85 backdrop-blur-md border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] text-[#D8D6C9] pointer-events-auto transition-colors duration-500">
+          {getCategoryIcon(sound.category)}
+          <span>{sound.category}</span>
         </span>
 
         <button
@@ -92,7 +125,7 @@ export const SoundCard: React.FC<SoundCardProps> = ({
           className={`p-2 sm:p-2.5 rounded-full backdrop-blur-md border transition-all pointer-events-auto min-w-[34px] min-h-[34px] flex items-center justify-center ${
             isFav
               ? 'bg-rose-950/70 border-rose-500/40 text-rose-300'
-              : 'bg-[#101816]/75 border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF]'
+              : 'bg-[#101816]/75 border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF]'
           }`}
           title={isFav ? 'Remove from favorites' : 'Add to favorites'}
           aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
@@ -105,13 +138,13 @@ export const SoundCard: React.FC<SoundCardProps> = ({
       <div className="relative z-10 p-4 sm:p-5 space-y-2 sm:space-y-2.5">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base sm:text-lg md:text-xl font-semibold tracking-wide text-[#F1F3EF] group-hover:text-[#91AFA9] transition-colors">
+            <h3 className="text-base sm:text-lg md:text-xl font-semibold tracking-wide text-[#F1F3EF] group-hover:text-[var(--theme-accent,#91AFA9)] transition-colors">
               {sound.title}
             </h3>
             {isActive && isPlaying && (
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#91AFA9] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#91AFA9]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--theme-accent,#91AFA9)] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--theme-accent,#91AFA9)]"></span>
               </span>
             )}
           </div>
@@ -125,7 +158,7 @@ export const SoundCard: React.FC<SoundCardProps> = ({
           {sound.moodTags.map((tag) => (
             <span
               key={tag}
-              className="text-[10px] px-2 py-0.5 rounded-md bg-[#202B28]/85 text-[#91AFA9] border border-[#91AFA9]/15 font-mono"
+              className="text-[10px] px-2 py-0.5 rounded-md bg-[var(--theme-surface,#202B28)]/85 text-[var(--theme-accent,#91AFA9)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.15))] font-mono transition-colors duration-500"
             >
               #{tag.toLowerCase()}
             </span>
@@ -133,7 +166,7 @@ export const SoundCard: React.FC<SoundCardProps> = ({
         </div>
 
         {/* Action Controls */}
-        <div className="pt-2 flex items-center justify-between border-t border-[#91AFA9]/15">
+        <div className="pt-2 flex items-center justify-between border-t border-[var(--theme-border-subtle,rgba(145,175,169,0.15))]">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-medium text-[#D8D6C9]">
               {isActive && isPlaying ? 'Playing' : 'Listen Now'}
@@ -163,8 +196,8 @@ export const SoundCard: React.FC<SoundCardProps> = ({
               onClick={handleMixLayerToggle}
               className={`p-2 sm:p-2.5 rounded-xl text-xs font-medium border transition-all min-w-[34px] min-h-[34px] flex items-center justify-center ${
                 isLayerActive
-                  ? 'bg-[#91AFA9]/20 border-[#91AFA9] text-[#91AFA9]'
-                  : 'bg-[#202B28]/90 border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF]'
+                  ? 'bg-[var(--theme-accent,#91AFA9)]/20 border-[var(--theme-accent,#91AFA9)] text-[var(--theme-accent,#91AFA9)]'
+                  : 'bg-[var(--theme-surface,#202B28)]/90 border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF]'
               }`}
               title={isLayerActive ? 'Active in atmosphere mix' : 'Add to atmosphere mix'}
               aria-label={isLayerActive ? 'Remove from atmosphere mix' : 'Add to atmosphere mix'}
@@ -181,8 +214,8 @@ export const SoundCard: React.FC<SoundCardProps> = ({
               }}
               className={`p-2.5 sm:p-3 rounded-xl border transition-all min-w-[38px] min-h-[38px] flex items-center justify-center ${
                 isActive && isPlaying
-                  ? 'bg-[#91AFA9] text-[#101816] border-[#91AFA9] shadow-lg'
-                  : 'bg-[#202B28] text-[#F1F3EF] border-[#91AFA9]/30 group-hover:bg-[#91AFA9] group-hover:text-[#101816] group-hover:border-[#91AFA9]'
+                  ? 'bg-[var(--theme-accent,#91AFA9)] text-[#101816] border-[var(--theme-accent,#91AFA9)] shadow-lg'
+                  : 'bg-[var(--theme-surface,#202B28)] text-[#F1F3EF] border-[var(--theme-border-subtle,rgba(145,175,169,0.3))] group-hover:bg-[var(--theme-accent,#91AFA9)] group-hover:text-[#101816] group-hover:border-[var(--theme-accent,#91AFA9)]'
               }`}
               title={isActive && isPlaying ? 'Pause sound' : 'Play sound'}
               aria-label={isActive && isPlaying ? `Pause ${sound.title}` : `Play ${sound.title}`}

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Manrope, Inter } from 'next/font/google';
+import { AmbientThemeProvider } from '@/components/theme/ambient-theme-provider';
 import './globals.css';
 
 const manrope = Manrope({
@@ -53,9 +54,11 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-screen bg-[#101816] text-[#F1F3EF] selection:bg-[#91AFA9]/30 selection:text-[#F1F3EF] flex flex-col antialiased"
+        className="min-h-screen text-[#F1F3EF] flex flex-col antialiased transition-colors duration-1000"
       >
-        {children}
+        <AmbientThemeProvider>
+          {children}
+        </AmbientThemeProvider>
       </body>
     </html>
   );

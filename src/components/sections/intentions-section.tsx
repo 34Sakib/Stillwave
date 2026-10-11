@@ -38,7 +38,7 @@ export const IntentionsSection: React.FC = () => {
     <section id="intentions" className="py-24 px-5 sm:px-8 max-w-7xl mx-auto">
       {/* Section Header */}
       <div className="mb-14 text-center max-w-2xl mx-auto">
-        <span className="text-xs uppercase font-mono tracking-widest text-[#91AFA9] block mb-2">
+        <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] block mb-2 transition-colors duration-1000">
           05 · Purpose-Driven Sessions
         </span>
         <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-[#F1F3EF] font-heading">
@@ -58,10 +58,10 @@ export const IntentionsSection: React.FC = () => {
             <div
               key={preset.id}
               onClick={() => handleStartIntention(preset)}
-              className={`p-7 rounded-3xl border transition-all duration-300 cursor-pointer flex flex-col justify-between group ${
+              className={`p-7 rounded-3xl border transition-all duration-500 cursor-pointer flex flex-col justify-between group ${
                 isActive
-                  ? 'bg-[#202B28] border-[#91AFA9] shadow-2xl ring-2 ring-[#91AFA9]/30 scale-[1.02]'
-                  : 'bg-[#101816]/70 border-[#91AFA9]/15 hover:border-[#91AFA9]/45 hover:bg-[#202B28]/60 hover:-translate-y-1'
+                  ? 'bg-[var(--theme-surface,#202B28)] border-[var(--theme-accent,#91AFA9)] shadow-2xl ring-2 ring-[var(--theme-accent,#91AFA9)]/30 scale-[1.02]'
+                  : 'bg-[var(--theme-bg,#101816)]/70 border-[var(--theme-border-subtle,rgba(145,175,169,0.15))] hover:border-[var(--theme-border-active,rgba(145,175,169,0.45))] hover:bg-[var(--theme-surface,#202B28)]/60 hover:-translate-y-1'
               }`}
               role="button"
               tabIndex={0}
@@ -76,19 +76,19 @@ export const IntentionsSection: React.FC = () => {
               <div>
                 {/* Header Badge & Icon */}
                 <div className="flex items-center justify-between mb-5">
-                  <div className="p-3 rounded-2xl bg-[#202B28] text-[#91AFA9] border border-[#91AFA9]/25 group-hover:bg-[#91AFA9] group-hover:text-[#101816] transition-colors">
+                  <div className="p-3 rounded-2xl bg-[var(--theme-surface,#202B28)] text-[var(--theme-accent,#91AFA9)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] group-hover:bg-[var(--theme-accent,#91AFA9)] group-hover:text-[#101816] transition-colors">
                     {iconMap[preset.iconName] || <Sparkles className="w-5 h-5" />}
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-[10px] uppercase font-mono tracking-wider bg-[#101816] border border-[#91AFA9]/20 text-[#D8D6C9]">
+                  <span className="px-3 py-1 rounded-full text-[10px] uppercase font-mono tracking-wider bg-[var(--theme-bg,#101816)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#D8D6C9]">
                     {preset.badge}
                   </span>
                 </div>
 
-                <h3 className="text-xl font-medium tracking-wide text-[#F1F3EF] group-hover:text-[#91AFA9] transition-colors">
+                <h3 className="text-xl font-medium tracking-wide text-[#F1F3EF] group-hover:text-[var(--theme-accent,#91AFA9)] transition-colors">
                   {preset.title}
                 </h3>
-                <span className="text-xs text-[#91AFA9] font-mono block mt-0.5">
+                <span className="text-xs text-[var(--theme-accent,#91AFA9)] font-mono block mt-0.5 transition-colors duration-500">
                   {preset.subtitle}
                 </span>
 
@@ -98,13 +98,13 @@ export const IntentionsSection: React.FC = () => {
               </div>
 
               {/* Layer details & Action Footer */}
-              <div className="mt-6 pt-5 border-t border-[#91AFA9]/15">
+              <div className="mt-6 pt-5 border-t border-[var(--theme-border-subtle,rgba(145,175,169,0.15))]">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {preset.layers.map((l) => (
                       <span
                         key={l.soundId}
-                        className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-[#101816] text-[#B3BDB6] border border-[#91AFA9]/10"
+                        className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-[var(--theme-bg,#101816)] text-[#B3BDB6] border border-[var(--theme-border-subtle,rgba(145,175,169,0.1))]"
                       >
                         {getSoundById(l.soundId)?.title} ({Math.round(l.volume * 100)}%)
                       </span>
@@ -113,7 +113,7 @@ export const IntentionsSection: React.FC = () => {
 
                   {preset.sleepTimerMinutes && (
                     <span className="text-[10px] font-mono text-[#D8D6C9] flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-[#91AFA9]" />
+                      <Clock className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />
                       {preset.sleepTimerMinutes}m
                     </span>
                   )}
@@ -127,8 +127,8 @@ export const IntentionsSection: React.FC = () => {
                   <div
                     className={`p-2.5 rounded-xl border transition-all ${
                       isActive
-                        ? 'bg-[#91AFA9] text-[#101816] border-[#91AFA9]'
-                        : 'bg-[#202B28] text-[#F1F3EF] border-[#91AFA9]/20 group-hover:bg-[#91AFA9] group-hover:text-[#101816]'
+                        ? 'bg-[var(--theme-accent,#91AFA9)] text-[#101816] border-[var(--theme-accent,#91AFA9)]'
+                        : 'bg-[var(--theme-surface,#202B28)] text-[#F1F3EF] border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] group-hover:bg-[var(--theme-accent,#91AFA9)] group-hover:text-[#101816]'
                     }`}
                   >
                     <Play className="w-3.5 h-3.5 fill-current ml-0.5" />

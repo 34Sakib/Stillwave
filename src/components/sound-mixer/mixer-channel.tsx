@@ -30,16 +30,16 @@ export const MixerChannel: React.FC<MixerChannelProps> = ({ sound }) => {
 
   return (
     <div
-      className={`relative flex flex-col justify-between p-5 rounded-2xl border transition-all duration-300 ${
+      className={`relative flex flex-col justify-between p-5 rounded-2xl border transition-all duration-500 ${
         isPlaying
-          ? 'bg-[#202B28] border-[#91AFA9]/40 shadow-xl ring-1 ring-[#91AFA9]/20'
-          : 'bg-[#101816]/70 border-[#91AFA9]/10 hover:border-[#91AFA9]/25'
+          ? 'bg-[var(--theme-surface,#202B28)] border-[var(--theme-border-active,rgba(145,175,169,0.4))] shadow-xl ring-1 ring-[var(--theme-accent,#91AFA9)]/20'
+          : 'bg-[var(--theme-bg,#101816)]/70 border-[var(--theme-border-subtle,rgba(145,175,169,0.1))] hover:border-[var(--theme-border-active,rgba(145,175,169,0.25))]'
       }`}
     >
       {/* Top Details & Toggle Power Button */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-[#91AFA9]/20 shrink-0">
+          <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] shrink-0">
             <Image
               src={sound.artwork}
               alt={sound.title}
@@ -52,7 +52,7 @@ export const MixerChannel: React.FC<MixerChannelProps> = ({ sound }) => {
             <h4 className="text-sm font-medium text-[#F1F3EF] leading-tight">
               {sound.title}
             </h4>
-            <span className="text-[11px] text-[#91AFA9] font-mono capitalize">
+            <span className="text-[11px] text-[var(--theme-accent,#91AFA9)] font-mono capitalize transition-colors duration-500">
               {sound.category}
             </span>
           </div>
@@ -63,8 +63,8 @@ export const MixerChannel: React.FC<MixerChannelProps> = ({ sound }) => {
           onClick={() => toggleLayerPlay(sound.id)}
           className={`p-2.5 rounded-xl border transition-all active:scale-95 ${
             isPlaying
-              ? 'bg-[#91AFA9] text-[#101816] border-[#91AFA9] shadow-md shadow-[#91AFA9]/20'
-              : 'bg-[#101816] text-[#B3BDB6] border-[#91AFA9]/20 hover:text-[#F1F3EF] hover:border-[#91AFA9]/40'
+              ? 'bg-[var(--theme-accent,#91AFA9)] text-[#101816] border-[var(--theme-accent,#91AFA9)] shadow-md'
+              : 'bg-[var(--theme-bg,#101816)] text-[#B3BDB6] border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] hover:text-[#F1F3EF] hover:border-[var(--theme-border-active,rgba(145,175,169,0.4))]'
           }`}
           title={isPlaying ? 'Mute/Disable track layer' : 'Activate track layer'}
           aria-label={isPlaying ? `Disable ${sound.title}` : `Enable ${sound.title}`}

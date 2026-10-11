@@ -8,7 +8,7 @@ export const SOUND_TRACKS: SoundTrack[] = [
     category: 'rain',
     description: 'Rhythmic, gentle rainfall descending upon quiet cedar rooftops and mossy stone paths. Naturally calms wandering thoughts.',
     moodTags: ['Focus', 'Reading', 'Rain'],
-    audioSrc: '/audio/rain/gentle-rain.wav',
+    audioSrc: '/audio/rain/gentle_rain.mp3',
     artwork: '/images/soundscapes/rain.jpg',
     tintColor: '#303E52', // Rain Blue
     defaultVolume: 0.75,
@@ -20,7 +20,7 @@ export const SOUND_TRACKS: SoundTrack[] = [
     category: 'ocean',
     description: 'Continuous, non-stop deep ocean swells with rhythmic rolling waves, gentle foamy crests, and an uninterrupted deep-water undercurrent.',
     moodTags: ['Sleep', 'Decompress', 'Calm'],
-    audioSrc: '/audio/ocean/soft-waves.wav',
+    audioSrc: '/audio/ocean/ocean-waves.mp3',
     artwork: '/images/soundscapes/ocean.jpg',
     tintColor: '#284654',
     defaultVolume: 0.75,
@@ -32,7 +32,7 @@ export const SOUND_TRACKS: SoundTrack[] = [
     category: 'forest',
     description: 'Deep alpine pine forest with an active bubbling mountain creek, rhythmic woodpecker drumming, and ethereal wood thrush flutes.',
     moodTags: ['Focus', 'Wilderness', 'Stream'],
-    audioSrc: '/audio/forest/forest-ambience.wav',
+    audioSrc: '/audio/forest/nature-forest-sound.mp3',
     artwork: '/images/soundscapes/forest.jpg',
     tintColor: '#2C4033', // Deep Moss
     defaultVolume: 0.65,
@@ -44,7 +44,7 @@ export const SOUND_TRACKS: SoundTrack[] = [
     category: 'fireplace',
     description: 'A glowing stone hearth burning birch and hickory. Gentle pops, soft resin crackles, and grounding warmth.',
     moodTags: ['Cozy', 'Evening', 'Comfort'],
-    audioSrc: '/audio/fireplace/soft-crackling.wav',
+    audioSrc: '/audio/fireplace/hearth-fireplace.mp3',
     artwork: '/images/soundscapes/fireplace.jpg',
     tintColor: '#4A3326', // Earth Sand
     defaultVolume: 0.60,

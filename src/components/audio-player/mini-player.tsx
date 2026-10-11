@@ -44,14 +44,14 @@ export const MiniPlayer: React.FC = () => {
         <div className="fixed bottom-4 right-4 z-40">
           <button
             onClick={openMiniPlayer}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#202B28]/95 border border-[#91AFA9]/40 text-[#F1F3EF] shadow-2xl hover:border-[#91AFA9] backdrop-blur-md transition-all active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-[var(--theme-surface,#202B28)]/95 border border-[var(--theme-border-active,rgba(145,175,169,0.4))] text-[#F1F3EF] shadow-2xl hover:border-[var(--theme-accent,#91AFA9)] backdrop-blur-md transition-all active:scale-95"
             aria-label="Re-open audio player"
           >
-            <div className="w-2 h-2 rounded-full bg-[#91AFA9] animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-[var(--theme-accent,#91AFA9)] animate-pulse" />
             <span className="text-xs font-medium font-mono max-w-[110px] truncate">
               {currentSound.title}
             </span>
-            <ChevronUp className="w-3.5 h-3.5 text-[#91AFA9]" />
+            <ChevronUp className="w-3.5 h-3.5 text-[var(--theme-accent,#91AFA9)]" />
           </button>
         </div>
       );
@@ -71,10 +71,10 @@ export const MiniPlayer: React.FC = () => {
         role="region"
         aria-label="Persistent Mini Audio Player"
       >
-        <div className="max-w-5xl mx-auto glass-panel rounded-2xl p-2.5 sm:px-5 sm:py-3.5 border border-[#91AFA9]/25 shadow-2xl flex items-center justify-between gap-2 sm:gap-6 pointer-events-auto">
+        <div className="max-w-5xl mx-auto glass-panel rounded-2xl p-2.5 sm:px-5 sm:py-3.5 border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] shadow-2xl flex items-center justify-between gap-2 sm:gap-6 pointer-events-auto transition-colors duration-1000">
           {/* Left: Artwork, Track Info, State Badges */}
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-[#91AFA9]/20 shrink-0 bg-[#101816]">
+            <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] shrink-0 bg-[var(--theme-bg,#101816)]">
               <Image
                 src={currentSound.artwork}
                 alt={currentSound.title}
@@ -83,8 +83,8 @@ export const MiniPlayer: React.FC = () => {
                 className="object-cover"
               />
               {isPlaying && (
-                <div className="absolute inset-0 bg-[#91AFA9]/20 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-[#91AFA9] animate-ping" />
+                <div className="absolute inset-0 bg-[var(--theme-accent,#91AFA9)]/20 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-[var(--theme-accent,#91AFA9)] animate-ping" />
                 </div>
               )}
             </div>
@@ -93,14 +93,14 @@ export const MiniPlayer: React.FC = () => {
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <a
                   href="#listening-room"
-                  className="text-xs sm:text-sm font-medium text-[#F1F3EF] hover:text-[#91AFA9] transition-colors truncate block max-w-[110px] xs:max-w-[150px] sm:max-w-[220px]"
+                  className="text-xs sm:text-sm font-medium text-[#F1F3EF] hover:text-[var(--theme-accent,#91AFA9)] transition-colors truncate block max-w-[110px] xs:max-w-[150px] sm:max-w-[220px]"
                   title="Go to Listening Lounge"
                 >
                   {currentSound.title}
                 </a>
 
                 {activeLayersCount > 1 && (
-                  <span className="hidden md:inline-block px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#91AFA9]/20 text-[#91AFA9] border border-[#91AFA9]/20 shrink-0">
+                  <span className="hidden md:inline-block px-2 py-0.5 rounded-full text-[10px] font-mono bg-[var(--theme-accent,#91AFA9)]/20 text-[var(--theme-accent,#91AFA9)] border border-[var(--theme-accent,#91AFA9)]/20 shrink-0">
                     +{activeLayersCount - 1} layers
                   </span>
                 )}
@@ -109,7 +109,7 @@ export const MiniPlayer: React.FC = () => {
               <div className="flex items-center gap-2 text-[10px] text-[#B3BDB6] font-mono">
                 {isLoading ? (
                   <span className="text-[#D8D6C9] flex items-center gap-1">
-                    <Loader2 className="w-2.5 h-2.5 animate-spin text-[#91AFA9]" />
+                    <Loader2 className="w-2.5 h-2.5 animate-spin text-[var(--theme-accent,#91AFA9)]" />
                     Fading in...
                   </span>
                 ) : isError ? (
@@ -118,7 +118,7 @@ export const MiniPlayer: React.FC = () => {
                     Error
                   </span>
                 ) : isPlaying ? (
-                  <span className="text-[#91AFA9]">Playing</span>
+                  <span className="text-[var(--theme-accent,#91AFA9)]">Playing</span>
                 ) : (
                   <span>Paused</span>
                 )}
@@ -138,7 +138,7 @@ export const MiniPlayer: React.FC = () => {
             <button
               onClick={togglePlayPause}
               disabled={isLoading}
-              className="p-2.5 sm:p-3 rounded-xl bg-[#91AFA9] text-[#101816] hover:bg-[#B4CCC7] active:scale-95 transition-all shadow-md"
+              className="p-2.5 sm:p-3 rounded-xl bg-[var(--theme-accent,#91AFA9)] text-[#101816] hover:bg-[var(--theme-accent-hover,#B4CCC7)] active:scale-95 transition-all shadow-md"
               aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
             >
               {isLoading ? (
@@ -153,7 +153,7 @@ export const MiniPlayer: React.FC = () => {
             {/* Stop button */}
             <button
               onClick={stopPlayback}
-              className="p-2 sm:p-2.5 rounded-xl bg-[#101816] text-[#B3BDB6] hover:text-[#F1F3EF] hover:bg-[#283633] border border-[#91AFA9]/20 transition-colors"
+              className="p-2 sm:p-2.5 rounded-xl bg-[var(--theme-bg,#101816)] text-[#B3BDB6] hover:text-[#F1F3EF] hover:bg-[var(--theme-elevated,#283633)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] transition-colors"
               title="Stop playback"
               aria-label="Stop playback"
             >

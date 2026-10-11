@@ -15,18 +15,32 @@
     --text-muted: #7E8D86;
     --border-subtle: rgba(145, 175, 169, 0.14);
     --border-active: rgba(145, 175, 169, 0.40);
+
+    /* Dynamic Soundscape Theme Defaults */
+    --theme-bg: #101816;
+    --theme-surface: #202B28;
+    --theme-elevated: #283633;
+    --theme-hover: #33433F;
+    --theme-accent: #91AFA9;
+    --theme-accent-hover: #B4CCC7;
+    --theme-accent-rgb: 145, 175, 169;
+    --theme-glow: rgba(145, 175, 169, 0.16);
+    --theme-glow-sec: rgba(40, 54, 51, 0.40);
+    --theme-border-subtle: rgba(145, 175, 169, 0.14);
+    --theme-border-active: rgba(145, 175, 169, 0.45);
+    --theme-text-accent: #B4CCC7;
   }
 
   body {
-    background-color: var(--deep-forest);
+    background-color: var(--theme-bg, #101816);
     color: var(--text-primary);
     font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
     overflow-x: hidden;
-    selection-background-color: rgba(145, 175, 169, 0.3);
+    transition: background-color 1.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s ease;
   }
 
   ::selection {
-    background-color: rgba(145, 175, 169, 0.3);
+    background-color: rgba(var(--theme-accent-rgb, 145, 175, 169), 0.3);
     color: #F1F3EF;
   }
 }
@@ -37,14 +51,16 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #101816;
+  background: var(--theme-bg, #101816);
+  transition: background 1.2s ease;
 }
 ::-webkit-scrollbar-thumb {
-  background: #283633;
+  background: var(--theme-elevated, #283633);
   border-radius: 4px;
+  transition: background 1.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #394C48;
+  background: var(--theme-hover, #394C48);
 }
 
 /* Custom Range Input Slider */
@@ -62,7 +78,7 @@ input[type="range"]:focus {
 input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
-  background: rgba(145, 175, 169, 0.2);
+  background: rgba(var(--theme-accent-rgb, 145, 175, 169), 0.2);
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -72,44 +88,46 @@ input[type="range"]::-webkit-slider-thumb {
   height: 16px;
   width: 16px;
   border-radius: 50%;
-  background: var(--sage-mist);
-  box-shadow: 0 0 10px rgba(145, 175, 169, 0.5);
-  transition: transform 0.15s ease, background-color 0.15s ease;
+  background: var(--theme-accent, #91AFA9);
+  box-shadow: 0 0 10px rgba(var(--theme-accent-rgb, 145, 175, 169), 0.5);
+  transition: transform 0.15s ease, background-color 0.8s ease;
 }
 
 input[type="range"]:hover::-webkit-slider-thumb {
   transform: scale(1.18);
-  background: #B4CCC7;
+  background: var(--theme-accent-hover, #B4CCC7);
 }
 
 input[type="range"]::-moz-range-track {
   height: 4px;
   border-radius: 2px;
-  background: rgba(145, 175, 169, 0.2);
+  background: rgba(var(--theme-accent-rgb, 145, 175, 169), 0.2);
 }
 
 input[type="range"]::-moz-range-thumb {
   height: 16px;
   width: 16px;
   border-radius: 50%;
-  background: var(--sage-mist);
+  background: var(--theme-accent, #91AFA9);
   border: none;
-  box-shadow: 0 0 10px rgba(145, 175, 169, 0.5);
+  box-shadow: 0 0 10px rgba(var(--theme-accent-rgb, 145, 175, 169), 0.5);
 }
 
-/* Glassmorphism Classes */
+/* Dynamic Glassmorphism Classes */
 .glass-panel {
-  background: rgba(32, 43, 40, 0.72);
+  background: color-mix(in srgb, var(--theme-surface, #202B28) 72%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(145, 175, 169, 0.12);
+  border: 1px solid var(--theme-border-subtle, rgba(145, 175, 169, 0.12));
+  transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-nav {
-  background: rgba(16, 24, 22, 0.82);
+  background: color-mix(in srgb, var(--theme-bg, #101816) 82%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(145, 175, 169, 0.1);
+  border-bottom: 1px solid var(--theme-border-subtle, rgba(145, 175, 169, 0.1));
+  transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Subtle organic aura animation */

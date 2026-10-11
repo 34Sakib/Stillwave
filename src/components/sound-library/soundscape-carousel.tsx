@@ -78,7 +78,7 @@ export const SoundscapeCarousel: React.FC = () => {
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 md:mb-12 gap-5 sm:gap-6">
         <div>
-          <span className="text-xs uppercase font-mono tracking-widest text-[#91AFA9] block mb-2">
+          <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] block mb-2 transition-colors duration-1000">
             02 · Soundscapes
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-tight text-[#F1F3EF] font-heading">
@@ -93,7 +93,7 @@ export const SoundscapeCarousel: React.FC = () => {
         <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
           <a
             href="#atmosphere-mixer"
-            className="inline-flex items-center gap-1.5 text-xs text-[#91AFA9] hover:text-[#F1F3EF] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-[var(--theme-accent,#91AFA9)] hover:text-[#F1F3EF] transition-colors"
           >
             <Sliders className="w-3.5 h-3.5" />
             <span>Open Multi-Track Mixer</span>
@@ -103,14 +103,14 @@ export const SoundscapeCarousel: React.FC = () => {
             <button
               onClick={scrollPrev}
               aria-label="Previous soundscapes"
-              className="p-2.5 sm:p-3 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-[#F1F3EF] hover:bg-[#283633] hover:border-[#91AFA9]/50 transition-colors active:scale-95"
+              className="p-2.5 sm:p-3 rounded-xl bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#F1F3EF] hover:bg-[var(--theme-elevated,#283633)] hover:border-[var(--theme-border-active,rgba(145,175,169,0.5))] transition-colors active:scale-95"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={scrollNext}
               aria-label="Next soundscapes"
-              className="p-2.5 sm:p-3 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-[#F1F3EF] hover:bg-[#283633] hover:border-[#91AFA9]/50 transition-colors active:scale-95"
+              className="p-2.5 sm:p-3 rounded-xl bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#F1F3EF] hover:bg-[var(--theme-elevated,#283633)] hover:border-[var(--theme-border-active,rgba(145,175,169,0.5))] transition-colors active:scale-95"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
