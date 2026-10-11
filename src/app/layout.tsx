@@ -22,8 +22,10 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico' },
+      { url: '/favicon.ico', sizes: '32x32' },
     ],
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
   },
 };
 
@@ -40,8 +42,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${manrope.variable} ${inter.variable} scroll-smooth dark`}>
-      <body className="min-h-screen bg-[#101816] text-[#F1F3EF] selection:bg-[#91AFA9]/30 selection:text-[#F1F3EF] flex flex-col antialiased">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${manrope.variable} ${inter.variable} scroll-smooth dark`}
+    >
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="alternate icon" href="/favicon.ico" />
+      </head>
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[#101816] text-[#F1F3EF] selection:bg-[#91AFA9]/30 selection:text-[#F1F3EF] flex flex-col antialiased"
+      >
         {children}
       </body>
     </html>
