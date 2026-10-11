@@ -79,4 +79,17 @@ export const INTENTION_PRESETS: AtmospherePreset[] = [
       { soundId: 'wind', volume: 0.80 },
     ],
   },
+  {
+    id: 'rural-dawn',
+    title: 'Rural Dawn',
+    subtitle: 'Misty bamboo grove & morning birds',
+    description: 'The deeply calming natural awakening of a Bengal village: morning Doyel calls, swaying bamboo leaves, and tranquil stillness.',
+    intention: 'Relax',
+    iconName: 'Sunrise',
+    badge: 'Morning Calm',
+    layers: [
+      { soundId: 'village', volume: 0.70 },
+      { soundId: 'wind', volume: 0.30 },
+    ],
+  },
 ];

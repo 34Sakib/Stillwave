@@ -8,6 +8,7 @@ import {
   BookOpen,
   Compass,
   Wind,
+  Sunrise,
   Play,
   Clock,
   Sparkles,
@@ -28,6 +29,7 @@ export const IntentionsSection: React.FC = () => {
     BookOpen: <BookOpen className="w-5 h-5" />,
     Compass: <Compass className="w-5 h-5" />,
     Wind: <Wind className="w-5 h-5" />,
+    Sunrise: <Sunrise className="w-5 h-5" />,
   };
 
   const handleStartIntention = (preset: AtmospherePreset) => {

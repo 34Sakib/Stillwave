@@ -28,13 +28,25 @@ export const SOUND_TRACKS: SoundTrack[] = [
   {
     id: 'forest',
     title: 'Whispering Forest',
-    subtitle: 'Pine canopy, birdsong & stream',
+    subtitle: 'Pine canopy, mountain creek & woodpecker',
     category: 'forest',
-    description: 'Sunlight filtering through ancient pine groves with gentle distant mountain runoff and quiet woodland sparrow calls.',
-    moodTags: ['Focus', 'Flow', 'Nature'],
+    description: 'Deep alpine pine forest with an active bubbling mountain creek, rhythmic woodpecker drumming, and ethereal wood thrush flutes.',
+    moodTags: ['Focus', 'Wilderness', 'Stream'],
     audioSrc: '/audio/forest/forest-ambience.wav',
     artwork: '/images/soundscapes/forest.jpg',
     tintColor: '#2C4033', // Deep Moss
+    defaultVolume: 0.65,
+  },
+  {
+    id: 'village',
+    title: 'Bengal Village Morning',
+    subtitle: 'Pond water, Asian Koel & bamboo grove',
+    category: 'village',
+    description: 'Dawn across rural Bengal. Tranquil village pond water ripples, resonant Asian Koel and Doyel dawn whistles, and gentle bamboo rustle.',
+    moodTags: ['Morning', 'Pond', 'Calm'],
+    audioSrc: '/audio/village/morning-village.wav',
+    artwork: '/images/soundscapes/village.jpg',
+    tintColor: '#364B3B', // Rural Foliage Green
     defaultVolume: 0.65,
   },
   {
