@@ -224,51 +224,63 @@ function genCalmRain(left, right, totalSamples, sampleRate) {
 }
 
 // =========================================================================
-// 2. IMPROVED CALMING OCEAN WAVES (Deep Nordic swell, gentle foamy crest, slow hypnotic 12s period)
+// 2. CONTINUOUS DEEP OCEAN SWELL (Non-stop, seamless rolling ocean without any pause)
+// - Continuous deep rolling water body: Never dies down or drops to silence
+// - Dual overlapping wave surges (12s primary wave + 6s offset counter-wave)
+// - Continuous foamy surf wash that rolls seamlessly
+// - 100% gapless non-stop playback
 // =========================================================================
 function genCalmOcean(left, right, totalSamples, sampleRate) {
-  const deepLP_L = new BiquadLP(180, sampleRate, 1.2);
-  const deepLP_R = new BiquadLP(180, sampleRate, 1.2);
-  const surfBP_L = new BiquadBP(750, sampleRate, 1.4);
-  const surfBP_R = new BiquadBP(820, sampleRate, 1.4);
+  const deepLP_L = new BiquadLP(190, sampleRate, 1.2);
+  const deepLP_R = new BiquadLP(190, sampleRate, 1.2);
+  const surfBP_L = new BiquadBP(720, sampleRate, 1.3);
+  const surfBP_R = new BiquadBP(800, sampleRate, 1.3);
+  const foamLP_L = new BiquadLP(1200, sampleRate, 0.7);
+  const foamLP_R = new BiquadLP(1200, sampleRate, 0.7);
 
   let brownL = 0, brownR = 0;
 
   for (let i = 0; i < totalSamples; i++) {
     const t = i / sampleRate;
-    const wavePhase = (t % 12) / 12;
 
-    let swell;
-    if (wavePhase < 0.5) {
-      swell = Math.pow(Math.sin(wavePhase * Math.PI), 1.6);
-    } else if (wavePhase < 0.7) {
-      swell = 0.95 + 0.05 * Math.sin((wavePhase - 0.5) * Math.PI * 5);
-    } else {
-      const decay = (wavePhase - 0.7) / 0.3;
-      swell = Math.exp(-decay * 2.8) * 0.95 + 0.12;
-    }
+    // Wave 1: 12-second primary ocean surge
+    const phase1 = (t % 12) / 12;
+    const wave1 = 0.5 * (1 - Math.cos(phase1 * Math.PI * 2)); // Smooth raised cosine, never sharp
 
-    const swell2 = 0.25 * Math.sin(((t + 3) / 12) * Math.PI * 2);
-    const totalEnvelope = Math.max(0.1, swell + swell2);
+    // Wave 2: 12-second counter-swell offset by 6 seconds (crests when Wave 1 recedes)
+    const phase2 = ((t + 6) % 12) / 12;
+    const wave2 = 0.5 * (1 - Math.cos(phase2 * Math.PI * 2));
 
+    // Wave 3: 8-second gentle rolling swell (keeps texture organic and non-repetitive)
+    const phase3 = (t % 8) / 8;
+    const wave3 = 0.5 * (1 - Math.cos(phase3 * Math.PI * 2));
+
+    // Combined swell envelope: minimum is ALWAYS >= 0.55 so the ocean NEVER pauses or drops to silence!
+    const totalSwell = 0.55 + 0.32 * wave1 + 0.28 * wave2 + 0.15 * wave3;
+
+    // Deep ocean water body (continuous rolling brownian noise)
     const wL = Math.random() * 2 - 1;
-    brownL = (brownL + 0.03 * wL) / 1.03;
+    brownL = (brownL + 0.03 * wL) / 1.025;
     const wR = Math.random() * 2 - 1;
-    brownR = (brownR + 0.03 * wR) / 1.03;
+    brownR = (brownR + 0.03 * wR) / 1.025;
 
-    const bassL = deepLP_L.process(brownL * 4.5);
-    const bassR = deepLP_R.process(brownR * 4.5);
+    const bassL = deepLP_L.process(brownL * 3.8);
+    const bassR = deepLP_R.process(brownR * 3.8);
 
-    const foamWhiteL = (Math.random() * 2 - 1) * Math.pow(swell, 2.2);
-    const foamWhiteR = (Math.random() * 2 - 1) * Math.pow(swell, 2.2);
-    const foamL = surfBP_L.process(foamWhiteL) * 1.6;
-    const foamR = surfBP_R.process(foamWhiteR) * 1.6;
+    // Dynamic foam wash corresponding to the cresting waves
+    const foamWhiteL = (Math.random() * 2 - 1) * (0.35 * Math.pow(wave1, 1.8) + 0.30 * Math.pow(wave2, 1.8) + 0.15);
+    const foamWhiteR = (Math.random() * 2 - 1) * (0.35 * Math.pow(wave1, 1.8) + 0.30 * Math.pow(wave2, 1.8) + 0.15);
 
-    const panL = 0.7 + 0.3 * Math.sin(t * 0.6);
-    const panR = 0.7 - 0.3 * Math.sin(t * 0.6);
+    const foamL = foamLP_L.process(surfBP_L.process(foamWhiteL) * 2.2);
+    const foamR = foamLP_R.process(surfBP_R.process(foamWhiteR) * 2.2);
 
-    left[i] = (bassL * 0.9 * totalEnvelope + foamL * 0.45) * panL;
-    right[i] = (bassR * 0.9 * totalEnvelope + foamR * 0.45) * panR;
+    // Smooth spatial stereo sway
+    const panL = 0.78 + 0.22 * Math.sin(t * 0.45);
+    const panR = 0.78 - 0.22 * Math.sin(t * 0.45);
+
+    // Continuous non-stop sound: continuous deep water body + seamless overlapping waves
+    left[i] = (bassL * 0.75 * totalSwell + foamL * 0.42) * panL;
+    right[i] = (bassR * 0.75 * totalSwell + foamR * 0.42) * panR;
   }
 }
 
