@@ -34,8 +34,8 @@ function createWavBuffer(sampleRate, durationSec, generateSamples) {
   const right = new Float32Array(totalSamples);
   generateSamples(left, right, totalSamples, sampleRate);
 
-  // Seamless 1.8-second equal-power loop crossfade at boundaries
-  const fadeLength = Math.floor(sampleRate * 1.8);
+  // Seamless 2.0-second equal-power loop crossfade at boundaries
+  const fadeLength = Math.floor(sampleRate * 2.0);
   for (let i = 0; i < fadeLength; i++) {
     const t = i / fadeLength;
     const headWeight = Math.sin(t * Math.PI * 0.5);
@@ -73,7 +73,7 @@ function createWavBuffer(sampleRate, durationSec, generateSamples) {
 }
 
 const SAMPLE_RATE = 44100;
-const DURATION = 24; // 24 seconds loopable for rich variety, distinct avian phrases, and deep breathing room
+const DURATION = 24; // 24 seconds loopable for rich variety, natural phasing, and breathing room
 
 // Lowpass Biquad Filter helper
 class BiquadLP {
@@ -116,22 +116,6 @@ class BiquadBP {
     this.y2 = this.y1; this.y1 = y;
     return y;
   }
-}
-
-// Helper: Synthesizes a realistic bird note with syrinx harmonics and smooth envelope
-function birdSyllable(t, startT, dur, startFreq, endFreq, curve = 1.0, vibratoFreq = 0, vibratoDepth = 0) {
-  if (t < startT || t > startT + dur) return 0;
-  const relT = (t - startT) / dur;
-  const env = Math.pow(Math.sin(relT * Math.PI), 1.25);
-  let freq = startFreq + (endFreq - startFreq) * Math.pow(relT, curve);
-  if (vibratoFreq > 0) {
-    freq += Math.sin(relT * dur * vibratoFreq * Math.PI * 2) * vibratoDepth;
-  }
-  const phase = (t - startT) * freq * Math.PI * 2;
-  const fundamental = Math.sin(phase);
-  const secondHarmonic = Math.sin(phase * 2) * 0.16;
-  const thirdHarmonic = Math.sin(phase * 3) * 0.04;
-  return (fundamental + secondHarmonic + thirdHarmonic) * env;
 }
 
 // =========================================================================
@@ -260,30 +244,32 @@ function genCalmWind(left, right, totalSamples, sampleRate) {
 }
 
 // =========================================================================
-// 4. DEEP TEMPERATE PINE FOREST (Mountain Creek, Pine Wind & Woodland Birds)
-// Strictly temperate wilderness: Woodpecker drumming, Wood Thrush flute,
-// and Great Tit calls. ZERO village or tropical sounds.
+// 4. DEEP TEMPERATE PINE FOREST (Mountain Creek, Pine Wind, Woodpecker & Thrush)
+// Pure Alpine Wilderness: Continuous mountain creek runoff over stones,
+// towering pine canopy wind, rhythmic hollow woodpecker trunk drumming,
+// and pure crystalline European Wood Thrush whistles.
+// ZERO village, ZERO doves, ZERO crows, ZERO koel sounds.
 // =========================================================================
 function genCalmForest(left, right, totalSamples, sampleRate) {
-  // Mountain brook filters (active bubbling creek over river pebbles)
-  const creekLP_L = new BiquadLP(580, sampleRate, 0.85);
-  const creekLP_R = new BiquadLP(580, sampleRate, 0.85);
-  const creekBP_L = new BiquadBP(950, sampleRate, 1.8);
-  const creekBP_R = new BiquadBP(1020, sampleRate, 1.8);
+  // Mountain brook filters (active bubbling creek over granite pebbles)
+  const creekLP_L = new BiquadLP(680, sampleRate, 0.85);
+  const creekLP_R = new BiquadLP(680, sampleRate, 0.85);
+  const creekSprayBP_L = new BiquadBP(1100, sampleRate, 1.8);
+  const creekSprayBP_R = new BiquadBP(1250, sampleRate, 1.8);
 
-  // Pine canopy wind filters (deep trunk resonance + high needle whisper)
+  // Pine tree canopy wind (deep resonant trunk swaying + high needle whisper)
   const pineTrunkLP = new BiquadLP(110, sampleRate, 1.4);
-  const pineNeedleBP_L = new BiquadBP(1400, sampleRate, 1.6);
-  const pineNeedleBP_R = new BiquadBP(1550, sampleRate, 1.6);
+  const pineNeedleBP_L = new BiquadBP(1550, sampleRate, 1.6);
+  const pineNeedleBP_R = new BiquadBP(1750, sampleRate, 1.6);
 
-  // Woodpecker resonant acoustic cavity filter
-  const woodBP = new BiquadBP(440, sampleRate, 3.2);
+  // Woodpecker hollow trunk resonance filter
+  const woodpeckerBP = new BiquadBP(450, sampleRate, 3.5);
 
   let cL = 0, cR = 0;
   let pL = 0, pR = 0;
 
-  // Spacious temperate canopy stereo delay line
-  const delaySamples = Math.floor(sampleRate * 0.09);
+  // Forest delay line for wide alpine space
+  const delaySamples = Math.floor(sampleRate * 0.08);
   const delayBufferL = new Float32Array(delaySamples);
   const delayBufferR = new Float32Array(delaySamples);
   let delayIndex = 0;
@@ -291,248 +277,109 @@ function genCalmForest(left, right, totalSamples, sampleRate) {
   for (let i = 0; i < totalSamples; i++) {
     const t = i / sampleRate;
 
-    // --- Creek Noise Base ---
+    // --- Active Mountain Brook ---
     const wL = Math.random() * 2 - 1;
-    cL = cL * 0.80 + wL * 0.20;
+    cL = cL * 0.82 + wL * 0.18;
     const wR = Math.random() * 2 - 1;
-    cR = cR * 0.80 + wR * 0.20;
+    cR = cR * 0.82 + wR * 0.18;
 
-    // Liquid pebble water droplets
-    let pebbleL = 0, pebbleR = 0;
-    if (Math.random() < 0.0016) pebbleL = (Math.random() * 0.22 - 0.11);
-    if (Math.random() < 0.0016) pebbleR = (Math.random() * 0.22 - 0.11);
+    let bubbleL = 0, bubbleR = 0;
+    if (Math.random() < 0.0018) bubbleL = (Math.random() * 0.24 - 0.12);
+    if (Math.random() < 0.0018) bubbleR = (Math.random() * 0.24 - 0.12);
 
-    const creekWaterL = creekLP_L.process(cL) * 0.45 + creekBP_L.process(cL + pebbleL) * 0.25;
-    const creekWaterR = creekLP_R.process(cR) * 0.45 + creekBP_R.process(cR + pebbleR) * 0.25;
+    const creekL = creekLP_L.process(cL) * 0.42 + creekSprayBP_L.process(cL + bubbleL) * 0.26;
+    const creekR = creekLP_R.process(cR) * 0.42 + creekSprayBP_R.process(cR + bubbleR) * 0.26;
 
-    // --- Pine Canopy Wind ---
-    const wWindL = Math.random() * 2 - 1;
-    pL = pL * 0.92 + wWindL * 0.08;
-    const wWindR = Math.random() * 2 - 1;
-    pR = pR * 0.92 + wWindR * 0.08;
+    // --- Pine Wind ---
+    const wPineL = Math.random() * 2 - 1;
+    pL = pL * 0.92 + wPineL * 0.08;
+    const wPineR = Math.random() * 2 - 1;
+    pR = pR * 0.92 + wPineR * 0.08;
 
-    const trunkSway = pineTrunkLP.process(pL + pR) * 0.35;
-    const needleWhisperL = pineNeedleBP_L.process(pL) * 0.20 * (0.8 + 0.2 * Math.sin(t * 0.3));
-    const needleWhisperR = pineNeedleBP_R.process(pR) * 0.20 * (0.8 + 0.2 * Math.cos(t * 0.3));
+    const trunkSway = pineTrunkLP.process(pL + pR) * 0.32;
+    const needleL = pineNeedleBP_L.process(pL) * 0.22 * (0.8 + 0.2 * Math.sin(t * 0.35));
+    const needleR = pineNeedleBP_R.process(pR) * 0.22 * (0.8 + 0.2 * Math.cos(t * 0.35));
 
-    // --- Temperate Forest Avian Synthesis ---
-    let forestAvianL = 0;
-    let forestAvianR = 0;
+    // --- Alpine Forest Avian Sounds ---
+    let forestL = 0;
+    let forestR = 0;
 
-    // 1. WOODPECKER DRUMMING (Rapid acoustic trunk strikes on hollow pine: tat-tat-tat-tat-tat)
-    // Drumming Burst 1 at t = 3.2s to 3.7s
-    if (t > 3.2 && t < 3.7) {
-      const burstT = t - 3.2; // 0 to 0.5s
-      const tapInterval = 0.045; // ~22 taps per second
-      const tapPhase = (burstT % tapInterval) / tapInterval;
+    // 1. WOODPECKER DRUMMING (Dry hollow pine trunk drumming: tat-tat-tat-tat-tat)
+    // Burst 1 at t = 2.8s to 3.25s
+    if (t > 2.8 && t < 3.25) {
+      const bT = t - 2.8;
+      const tapInterval = 0.042; // ~24 taps/sec
+      const tapPhase = (bT % tapInterval) / tapInterval;
       if (tapPhase < 0.25) {
-        const tapEnv = Math.exp(-tapPhase * 16);
-        const impulse = (Math.sin(tapPhase * 440 * Math.PI * 2) + (Math.random() * 0.5 - 0.25)) * tapEnv;
-        const drum = woodBP.process(impulse) * 0.32;
-        forestAvianR += drum * 0.8;
-        forestAvianL += drum * 0.3; // Stereo panning to right distance
+        const tapEnv = Math.exp(-tapPhase * 18);
+        const impulse = (Math.sin(tapPhase * 450 * Math.PI * 2) + (Math.random() * 0.6 - 0.3)) * tapEnv;
+        const drum = woodpeckerBP.process(impulse) * 0.35;
+        forestR += drum * 0.85;
+        forestL += drum * 0.25;
+      }
+    }
+    // Burst 2 at t = 14.2s to 14.65s
+    if (t > 14.2 && t < 14.65) {
+      const bT = t - 14.2;
+      const tapInterval = 0.044;
+      const tapPhase = (bT % tapInterval) / tapInterval;
+      if (tapPhase < 0.25) {
+        const tapEnv = Math.exp(-tapPhase * 18);
+        const impulse = (Math.sin(tapPhase * 430 * Math.PI * 2) + (Math.random() * 0.6 - 0.3)) * tapEnv;
+        const drum = woodpeckerBP.process(impulse) * 0.30;
+        forestL += drum * 0.85;
+        forestR += drum * 0.25;
       }
     }
 
-    // Drumming Burst 2 at t = 14.5s to 15.0s
-    if (t > 14.5 && t < 15.0) {
-      const burstT = t - 14.5;
-      const tapInterval = 0.048;
-      const tapPhase = (burstT % tapInterval) / tapInterval;
-      if (tapPhase < 0.25) {
-        const tapEnv = Math.exp(-tapPhase * 16);
-        const impulse = (Math.sin(tapPhase * 420 * Math.PI * 2) + (Math.random() * 0.5 - 0.25)) * tapEnv;
-        const drum = woodBP.process(impulse) * 0.28;
-        forestAvianL += drum * 0.85;
-        forestAvianR += drum * 0.25;
-      }
-    }
+    // 2. EUROPEAN WOOD THRUSH & BLACKBIRD FLUTES (Pure high crystal melody)
+    // Phrase 1 (t = 5.8s to 7.8s): Bell-like double-tone flute
+    const thrush1 = (startT, dur, f1, f2) => {
+      if (t < startT || t > startT + dur) return 0;
+      const rT = (t - startT) / dur;
+      const env = Math.pow(Math.sin(rT * Math.PI), 1.3);
+      const freq = f1 + (f2 - f1) * rT;
+      const ph = (t - startT) * freq * Math.PI * 2;
+      // Pure glass flute overtone
+      return (Math.sin(ph) + Math.sin(ph * 2) * 0.12) * env;
+    };
 
-    // 2. WOOD THRUSH (Ethereal flute-like harmonic double-tone whistles)
-    // Phrase 1 (t = 6.2s to 8.2s): Classic bell-like ascending flute motif
-    forestAvianL += birdSyllable(t, 6.20, 0.28, 2200, 2800, 0.8) * 0.30;
-    forestAvianL += birdSyllable(t, 6.55, 0.24, 2800, 3350, 1.1) * 0.32;
-    forestAvianL += birdSyllable(t, 6.88, 0.38, 3350, 2400, 0.7, 10, 120) * 0.35;
+    forestL += thrush1(5.8, 0.28, 2600, 3150) * 0.32;
+    forestL += thrush1(6.15, 0.24, 3150, 3550) * 0.34;
+    forestL += thrush1(6.46, 0.36, 3550, 2800) * 0.36;
 
-    // Phrase 2 (t = 17.5s to 19.4s): Twilight wood thrush call
-    forestAvianL += birdSyllable(t, 17.50, 0.26, 2400, 3050, 0.9) * 0.32;
-    forestAvianL += birdSyllable(t, 17.82, 0.25, 3050, 3500, 1.1) * 0.30;
-    forestAvianL += birdSyllable(t, 18.15, 0.42, 3500, 2600, 0.8, 12, 140) * 0.34;
+    // Phrase 2 (t = 17.0s to 19.0s)
+    forestL += thrush1(17.0, 0.26, 2750, 3250) * 0.32;
+    forestL += thrush1(17.32, 0.28, 3250, 3700) * 0.34;
+    forestL += thrush1(17.68, 0.40, 3700, 2900) * 0.35;
 
-    // 3. GREAT TIT / CHICKADEE (Crisp bright two-tone "tea-cher, tea-cher" staccato call)
-    // Call 1 at t = 10.4s to 11.6s
-    forestAvianR += birdSyllable(t, 10.40, 0.16, 3800, 3400, 1.0) * 0.26;
-    forestAvianR += birdSyllable(t, 10.62, 0.16, 3400, 3000, 1.0) * 0.24;
-    forestAvianR += birdSyllable(t, 10.90, 0.16, 3850, 3450, 1.0) * 0.26;
-    forestAvianR += birdSyllable(t, 11.12, 0.16, 3450, 3050, 1.0) * 0.24;
+    // 3. GREAT TIT (Bright two-tone "tea-cher, tea-cher" staccato at t = 9.8s to 11.0s)
+    const titNote = (startT, freq) => {
+      if (t < startT || t > startT + 0.15) return 0;
+      const rT = (t - startT) / 0.15;
+      const env = Math.pow(Math.sin(rT * Math.PI), 1.2);
+      const ph = (t - startT) * freq * Math.PI * 2;
+      return Math.sin(ph) * env;
+    };
+    forestR += titNote(9.80, 3850) * 0.25;
+    forestR += titNote(10.02, 3350) * 0.22;
+    forestR += titNote(10.35, 3850) * 0.25;
+    forestR += titNote(10.57, 3350) * 0.22;
 
-    // Distant response call at t = 21.0s to 22.0s
-    forestAvianR += birdSyllable(t, 21.00, 0.15, 3900, 3500, 1.0) * 0.20;
-    forestAvianR += birdSyllable(t, 21.22, 0.15, 3500, 3100, 1.0) * 0.18;
-
-    // Forest canopy spatial reverberation
+    // Forest delay
     const delL = delayBufferL[delayIndex];
     const delR = delayBufferR[delayIndex];
-    delayBufferL[delayIndex] = forestAvianL + delL * 0.25;
-    delayBufferR[delayIndex] = forestAvianR + delR * 0.25;
+    delayBufferL[delayIndex] = forestL + delL * 0.25;
+    delayBufferR[delayIndex] = forestR + delR * 0.25;
     delayIndex = (delayIndex + 1) % delaySamples;
 
-    const totalAvianL = forestAvianL + delL * 0.18;
-    const totalAvianR = forestAvianR + delR * 0.18;
-
-    left[i] = (creekWaterL + needleWhisperL + trunkSway) * 0.75 + totalAvianL;
-    right[i] = (creekWaterR + needleWhisperR + trunkSway) * 0.75 + totalAvianR;
+    left[i] = (creekL + needleL + trunkSway) * 0.75 + forestL + delL * 0.18;
+    right[i] = (creekR + needleR + trunkSway) * 0.75 + forestR + delR * 0.18;
   }
 }
 
 // =========================================================================
-// 5. BANGLADESH VILLAGE MORNING (বাংলার সকাল ও পুকুর ঘাট)
-// Direct acoustic emulation of the Epidemic Sound reference:
-// - Tranquil rural pond water surface (Pukur ghat) with soft waterbody ripples
-// - Swaying bamboo grove (Bansh-bagan) & coconut palms with organic stem creaks
-// - Asian Koel (Kokil) resonant ascending "Koo... koo-EL!" call
-// - Oriental Magpie-Robin (Doyel) dawn whistling phrases
-// - Common Myna (Shalik) social chattering & distant shoreline waterbird
-// =========================================================================
-function genBangladeshVillageMorning(left, right, totalSamples, sampleRate) {
-  // Village pond water filters (placid, muddy shore water surface, soft droplets)
-  const pondWaterLP_L = new BiquadLP(360, sampleRate, 0.95);
-  const pondWaterLP_R = new BiquadLP(360, sampleRate, 0.95);
-  const waterLapBP_L = new BiquadBP(480, sampleRate, 1.6);
-  const waterLapBP_R = new BiquadBP(520, sampleRate, 1.6);
-
-  // Bamboo grove & palm frond wind (soft humid dawn breeze)
-  const bambooLeafBP_L = new BiquadBP(420, sampleRate, 1.2);
-  const bambooLeafBP_R = new BiquadBP(460, sampleRate, 1.2);
-
-  // Koel echo acoustic cavity filter
-  const koelResonanceBP = new BiquadBP(1650, sampleRate, 2.5);
-
-  let nL = 0, nR = 0;
-  let bL = 0, bR = 0;
-
-  // Open-air rural village reverberation delay line
-  const delaySamples = Math.floor(sampleRate * 0.14);
-  const delayBufferL = new Float32Array(delaySamples);
-  const delayBufferR = new Float32Array(delaySamples);
-  let delayIndex = 0;
-
-  for (let i = 0; i < totalSamples; i++) {
-    const t = i / sampleRate;
-
-    // --- Village Pond Water Surface (পুকুর ঘাটের পানি) ---
-    const wL = Math.random() * 2 - 1;
-    nL = nL * 0.88 + wL * 0.12;
-    const wR = Math.random() * 2 - 1;
-    nR = nR * 0.88 + wR * 0.12;
-
-    // Soft water droplets & lily pad surface ripples
-    let dropL = 0, dropR = 0;
-    if (Math.random() < 0.0005) dropL = (Math.random() * 0.14 - 0.07);
-    if (Math.random() < 0.0005) dropR = (Math.random() * 0.14 - 0.07);
-
-    const waterL = pondWaterLP_L.process(nL) * 0.36 + waterLapBP_L.process(nL + dropL) * 0.18;
-    const waterR = pondWaterLP_R.process(nR) * 0.36 + waterLapBP_R.process(nR + dropR) * 0.18;
-
-    // --- Bamboo Grove Breeze (বাঁশবাগান ও নারিকেল পাতা) ---
-    const wbL = Math.random() * 2 - 1;
-    bL = bL * 0.90 + wbL * 0.10;
-    const wbR = Math.random() * 2 - 1;
-    bR = bR * 0.90 + wbR * 0.10;
-
-    const dawnBreeze = 0.70 + 0.30 * Math.sin(t * 0.28);
-    const bambooRustleL = bambooLeafBP_L.process(bL) * 0.32 * dawnBreeze;
-    const bambooRustleR = bambooLeafBP_R.process(bR) * 0.32 * dawnBreeze;
-
-    // Organic bamboo stalk creak (leaning tall bamboo in dawn breeze)
-    let bambooCreakL = 0, bambooCreakR = 0;
-    if (t > 9.2 && t < 9.8) {
-      const creakT = (t - 9.2) / 0.6;
-      bambooCreakL = Math.sin(creakT * Math.PI) * Math.sin(creakT * 310 * Math.PI * 2) * 0.040;
-    }
-    if (t > 19.5 && t < 20.1) {
-      const creakT = (t - 19.5) / 0.6;
-      bambooCreakR = Math.sin(creakT * Math.PI) * Math.sin(creakT * 285 * Math.PI * 2) * 0.038;
-    }
-
-    // --- South Asian Rural Avian Acoustics (Epidemic Sound Reference Emulation) ---
-    let villageAvianL = 0;
-    let villageAvianR = 0;
-
-    // 1. ASIAN KOEL (Kokil / কোকিল) - Resonant ascending call ("Kooo... koo-EL!")
-    // Phrase 1 at t = 3.8s to 6.2s in right orchard:
-    // Syllable 1: Low warm "Kooo..."
-    const koelSyllable1 = birdSyllable(t, 3.80, 0.52, 1360, 1620, 0.9);
-    // Syllable 2: Sweet ascending resonant "koo-EL!"
-    const koelSyllable2 = birdSyllable(t, 4.45, 0.62, 1420, 1920, 1.25);
-    const koelCall1 = (koelSyllable1 * 0.38 + koelSyllable2 * 0.46);
-    villageAvianR += koelCall1 + koelResonanceBP.process(koelCall1) * 0.25;
-    villageAvianL += (koelCall1 * 0.30); // Open air stereo bleed
-
-    // Phrase 2 at t = 13.5s to 15.9s (Echoing second call across the pond):
-    const koelSyllable3 = birdSyllable(t, 13.50, 0.48, 1380, 1640, 0.9);
-    const koelSyllable4 = birdSyllable(t, 14.12, 0.58, 1440, 1950, 1.25);
-    const koelCall2 = (koelSyllable3 * 0.36 + koelSyllable4 * 0.44);
-    villageAvianR += koelCall2 + koelResonanceBP.process(koelCall2) * 0.22;
-    villageAvianL += (koelCall2 * 0.32);
-
-    // 2. ORIENTAL MAGPIE-ROBIN (Doyel / দোয়েল - National Bird)
-    // Morning dawn flute melody from high mango tree:
-    // Motif 1 at t = 1.2s to 3.2s:
-    villageAvianL += birdSyllable(t, 1.20, 0.22, 2300, 2750, 0.9) * 0.36;
-    villageAvianL += birdSyllable(t, 1.48, 0.24, 2750, 3150, 1.1) * 0.38;
-    villageAvianL += birdSyllable(t, 1.78, 0.28, 3150, 2600, 0.8, 12, 140) * 0.35;
-    villageAvianL += birdSyllable(t, 2.12, 0.36, 2600, 2150, 0.7) * 0.30;
-
-    // Motif 2 at t = 10.8s to 12.8s:
-    villageAvianL += birdSyllable(t, 10.80, 0.20, 2400, 2900, 0.9) * 0.34;
-    villageAvianL += birdSyllable(t, 11.06, 0.24, 2900, 3250, 1.2) * 0.37;
-    villageAvianL += birdSyllable(t, 11.36, 0.30, 3250, 2700, 0.8, 14, 160) * 0.35;
-    villageAvianL += birdSyllable(t, 11.72, 0.38, 2700, 2200, 0.7) * 0.30;
-
-    // Motif 3 at t = 20.4s to 22.2s:
-    villageAvianL += birdSyllable(t, 20.40, 0.22, 2500, 3000, 0.9) * 0.32;
-    villageAvianL += birdSyllable(t, 20.68, 0.26, 3000, 2550, 0.8, 12, 140) * 0.34;
-    villageAvianL += birdSyllable(t, 21.00, 0.36, 2550, 2100, 0.7) * 0.28;
-
-    // 3. COMMON MYNA / SHALIK (শালিক - Social morning chattering in bamboo bushes)
-    // Chattering phrase 1 at t = 7.0s to 8.2s:
-    villageAvianR += birdSyllable(t, 7.00, 0.08, 3100, 2600, 1.1) * 0.22;
-    villageAvianR += birdSyllable(t, 7.14, 0.08, 3250, 2750, 1.1) * 0.24;
-    villageAvianR += birdSyllable(t, 7.30, 0.16, 2900, 2300, 0.8, 22, 180) * 0.26;
-    villageAvianR += birdSyllable(t, 7.54, 0.10, 3400, 2800, 1.0) * 0.22;
-
-    // Chattering phrase 2 at t = 16.8s to 18.0s:
-    villageAvianR += birdSyllable(t, 16.80, 0.08, 3150, 2650, 1.1) * 0.22;
-    villageAvianR += birdSyllable(t, 16.94, 0.08, 3300, 2800, 1.1) * 0.24;
-    villageAvianR += birdSyllable(t, 17.10, 0.16, 2950, 2350, 0.8, 20, 160) * 0.25;
-
-    // 4. DISTANT WATERBIRD / POND HERON (Waterbody dawn atmosphere)
-    // Gentle shoreline low cluck at t = 8.8s
-    if (t > 8.8 && t < 9.15) {
-      const hT = (t - 8.8) / 0.35;
-      const hEnv = Math.pow(Math.sin(hT * Math.PI), 1.5);
-      const heron = (Math.sin(hT * 820 * Math.PI * 2) + Math.sin(hT * 1640 * Math.PI * 2) * 0.3) * hEnv * 0.16;
-      villageAvianL += heron;
-    }
-
-    // Rural open-air acoustic reflection & spatial field
-    const delL = delayBufferL[delayIndex];
-    const delR = delayBufferR[delayIndex];
-    delayBufferL[delayIndex] = villageAvianL + delL * 0.28;
-    delayBufferR[delayIndex] = villageAvianR + delR * 0.28;
-    delayIndex = (delayIndex + 1) % delaySamples;
-
-    const totalAvianL = villageAvianL + delL * 0.20;
-    const totalAvianR = villageAvianR + delR * 0.20;
-
-    left[i] = (waterL + bambooRustleL + bambooCreakL) * 0.82 + totalAvianL;
-    right[i] = (waterR + bambooRustleR + bambooCreakR) * 0.82 + totalAvianR;
-  }
-}
-
-// =========================================================================
-// 6. HEARTH FIREPLACE (Warm hearth rumble + gentle birch crackles & soft ember pop)
+// 5. HEARTH FIREPLACE (Warm hearth rumble + gentle birch crackles & soft ember pop)
 // =========================================================================
 function genCalmFireplace(left, right, totalSamples, sampleRate) {
   const hearthLP_L = new BiquadLP(250, sampleRate, 1.1);
@@ -559,7 +406,7 @@ function genCalmFireplace(left, right, totalSamples, sampleRate) {
 }
 
 // =========================================================================
-// 7. MIDNIGHT MEADOW (Serene summer crickets, warm night resonance, tranquil pulsing)
+// 6. MIDNIGHT MEADOW (Serene summer crickets, warm night resonance, tranquil pulsing)
 // =========================================================================
 function genCalmNight(left, right, totalSamples, sampleRate) {
   for (let i = 0; i < totalSamples; i++) {
@@ -577,13 +424,12 @@ const sounds = [
   { folder: 'rain', file: 'gentle-rain.wav', gen: genCalmRain },
   { folder: 'ocean', file: 'soft-waves.wav', gen: genCalmOcean },
   { folder: 'forest', file: 'forest-ambience.wav', gen: genCalmForest },
-  { folder: 'village', file: 'morning-village.wav', gen: genBangladeshVillageMorning },
   { folder: 'fireplace', file: 'soft-crackling.wav', gen: genCalmFireplace },
   { folder: 'wind', file: 'gentle-breeze.wav', gen: genCalmWind },
   { folder: 'night', file: 'night-insects.wav', gen: genCalmNight },
 ];
 
-console.log('Generating ultra-calming, high-fidelity ambient soundscapes (Distinct Forest vs Bangladesh Village)...');
+console.log('Generating ultra-calming, high-fidelity ambient soundscapes (6 Core Ambient Environments)...');
 sounds.forEach(({ folder, file, gen }) => {
   const dir = path.join(__dirname, '..', 'public', 'audio', folder);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -592,4 +438,4 @@ sounds.forEach(({ folder, file, gen }) => {
   fs.writeFileSync(filePath, buf);
   console.log(`✓ Generated ${filePath} (${(buf.length / 1024).toFixed(1)} KB)`);
 });
-console.log('All 7 soundscapes successfully synthesized and perfected!');
+console.log('All 6 soundscapes successfully synthesized and perfected!');

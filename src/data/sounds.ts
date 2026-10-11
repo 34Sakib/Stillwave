@@ -38,18 +38,6 @@ export const SOUND_TRACKS: SoundTrack[] = [
     defaultVolume: 0.65,
   },
   {
-    id: 'village',
-    title: 'Bengal Village Morning',
-    subtitle: 'Pond water, Asian Koel & bamboo grove',
-    category: 'village',
-    description: 'Dawn across rural Bengal. Tranquil village pond water ripples, resonant Asian Koel and Doyel dawn whistles, and gentle bamboo rustle.',
-    moodTags: ['Morning', 'Pond', 'Calm'],
-    audioSrc: '/audio/village/morning-village.wav',
-    artwork: '/images/soundscapes/village.jpg',
-    tintColor: '#364B3B', // Rural Foliage Green
-    defaultVolume: 0.65,
-  },
-  {
     id: 'fireplace',
     title: 'Hearth Fireplace',
     subtitle: 'Aromatic wood crackle & gentle embers',

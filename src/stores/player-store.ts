@@ -48,7 +48,6 @@ export const usePlayerStore = create<PlayerStoreState>()(
         rain: { volume: 0.75, isMuted: false, isPlaying: false },
         ocean: { volume: 0.70, isMuted: false, isPlaying: false },
         forest: { volume: 0.65, isMuted: false, isPlaying: false },
-        village: { volume: 0.65, isMuted: false, isPlaying: false },
         fireplace: { volume: 0.60, isMuted: false, isPlaying: false },
         wind: { volume: 0.55, isMuted: false, isPlaying: false },
         night: { volume: 0.60, isMuted: false, isPlaying: false },

@@ -1,4 +1,4 @@
-export type SoundCategory = 'rain' | 'ocean' | 'forest' | 'fireplace' | 'wind' | 'night' | 'village';
+export type SoundCategory = 'rain' | 'ocean' | 'forest' | 'fireplace' | 'wind' | 'night';
 
 export type PlaybackStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'stopped' | 'switching' | 'error';
 
