@@ -20,7 +20,10 @@ export const metadata: Metadata = {
   keywords: ['ambient sounds', 'focus music', 'rain sounds', 'sleep sounds', 'white noise', 'soundscapes', 'relaxation'],
   authors: [{ name: 'Stillwave Sanctuary' }],
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico' },
+    ],
   },
 };
 
