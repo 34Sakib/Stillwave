@@ -17,9 +17,108 @@ class StillwaveAudioEngine {
   private layers: Map<string, SoundLayerInstance> = new Map();
   private sleepTimerId: ReturnType<typeof setTimeout> | null = null;
   private isUnlocked: boolean = false;
+  private activeSoundId: string | null = null;
+  private audioTickListeners: Set<() => void> = new Set();
+  private mediaHandlersRegistered: boolean = false;
 
   constructor() {
-    // Lazy AudioContext initialization on first user interaction
+    // Visibility listener to ensure audio continuity and resume context on phone wake
+    if (typeof window !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          if (this.ctx && this.ctx.state === 'suspended' && this.isPlayingAny()) {
+            this.ctx.resume().catch((err) => console.warn('Context resume failed:', err));
+          }
+        }
+      });
+    }
+  }
+
+  public isPlayingAny(): boolean {
+    for (const layer of this.layers.values()) {
+      if (layer.isPlaying) return true;
+    }
+    return false;
+  }
+
+  public getActiveAudioElement(): HTMLAudioElement | null {
+    if (!this.activeSoundId) return null;
+    return this.layers.get(this.activeSoundId)?.audio ?? null;
+  }
+
+  /**
+   * Registers a heartbeat callback attached to the active playing audio element's native timeupdate event.
+   * This continues to fire in mobile background / screen-off state as long as audio plays.
+   */
+  public onAudioTick(callback: () => void): () => void {
+    this.audioTickListeners.add(callback);
+    return () => {
+      this.audioTickListeners.delete(callback);
+    };
+  }
+
+  private notifyAudioTick(): void {
+    this.audioTickListeners.forEach((listener) => {
+      try {
+        listener();
+      } catch (err) {
+        console.warn('Error in audio tick listener:', err);
+      }
+    });
+  }
+
+  /**
+   * Updates OS-level MediaSession (iOS Lock Screen / Dynamic Island & Android Media Notification).
+   */
+  public updateMediaSession(
+    sound: { title: string; subtitle?: string; artwork?: string },
+    isPlaying: boolean
+  ): void {
+    if (typeof window === 'undefined' || !('mediaSession' in navigator)) return;
+
+    try {
+      const artworkList = sound.artwork
+        ? [
+            { src: sound.artwork, sizes: '512x512', type: 'image/jpeg' },
+            { src: sound.artwork, sizes: '256x256', type: 'image/jpeg' },
+          ]
+        : [];
+
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: sound.title,
+        artist: 'Stillwave',
+        album: sound.subtitle || 'Calm Soundscapes',
+        artwork: artworkList,
+      });
+
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    } catch (e) {
+      console.warn('Error setting MediaSession metadata:', e);
+    }
+  }
+
+  /**
+   * Configures Lock Screen media action handlers (Play, Pause, Stop, Prev, Next).
+   */
+  public setupMediaSessionHandlers(handlers: {
+    onPlay: () => void;
+    onPause: () => void;
+    onStop: () => void;
+    onNext?: () => void;
+    onPrev?: () => void;
+  }): void {
+    if (typeof window === 'undefined' || !('mediaSession' in navigator) || this.mediaHandlersRegistered) return;
+
+    try {
+      navigator.mediaSession.setActionHandler('play', () => handlers.onPlay());
+      navigator.mediaSession.setActionHandler('pause', () => handlers.onPause());
+      navigator.mediaSession.setActionHandler('stop', () => handlers.onStop());
+      if (handlers.onNext) navigator.mediaSession.setActionHandler('nexttrack', () => handlers.onNext!());
+      if (handlers.onPrev) navigator.mediaSession.setActionHandler('previoustrack', () => handlers.onPrev!());
+      this.mediaHandlersRegistered = true;
+    } catch (err) {
+      console.warn('MediaSession action handler registration failed:', err);
+    }
   }
 
   public getAudioContext(): AudioContext | null {
@@ -76,6 +175,15 @@ class StillwaveAudioEngine {
       audio.loop = true;
       audio.preload = 'auto';
       audio.crossOrigin = 'anonymous';
+
+      // Keep native audio.volume synchronized for background playback resilience
+      audio.volume = initialVolume;
+
+      audio.addEventListener('timeupdate', () => {
+        if (layer && layer.isPlaying) {
+          this.notifyAudioTick();
+        }
+      });
 
       let gainNode: GainNode;
       let sourceNode: MediaElementAudioSourceNode | null = null;
@@ -160,6 +268,10 @@ class StillwaveAudioEngine {
     try {
       await targetLayer.audio.play();
       targetLayer.isPlaying = true;
+      this.activeSoundId = soundId;
+      if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = 'playing';
+      }
     } catch (error) {
       console.warn('Play error for', soundId, error);
       throw error;
@@ -185,6 +297,9 @@ class StillwaveAudioEngine {
       layer.audio.pause();
       layer.isPlaying = false;
     }
+    if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = this.isPlayingAny() ? 'playing' : 'paused';
+    }
   }
 
   /**
@@ -200,6 +315,12 @@ class StillwaveAudioEngine {
       layer.audio.currentTime = 0;
       layer.isPlaying = false;
     }
+    if (this.activeSoundId === soundId) {
+      this.activeSoundId = null;
+    }
+    if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = this.isPlayingAny() ? 'playing' : 'none';
+    }
   }
 
   /**
@@ -212,6 +333,9 @@ class StillwaveAudioEngine {
         layer.audio.pause();
         layer.isPlaying = false;
       }
+    }
+    if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'paused';
     }
   }
 
@@ -226,10 +350,14 @@ class StillwaveAudioEngine {
         try {
           await layer.audio.play();
           layer.isPlaying = true;
+          this.activeSoundId = layer.soundId;
         } catch (err) {
           console.warn('Resume error', layer.soundId, err);
         }
       }
+    }
+    if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = this.isPlayingAny() ? 'playing' : 'paused';
     }
   }
 
@@ -242,6 +370,10 @@ class StillwaveAudioEngine {
       layer.audio.pause();
       layer.audio.currentTime = 0;
       layer.isPlaying = false;
+    }
+    this.activeSoundId = null;
+    if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'none';
     }
   }
 
@@ -299,6 +431,10 @@ class StillwaveAudioEngine {
       const currTime = this.ctx.currentTime;
       this.masterGain.gain.cancelScheduledValues(currTime);
       this.masterGain.gain.linearRampToValueAtTime(safeVolume * 0.85, currTime + 0.05);
+    }
+    // Keep active audio element volumes aligned for background playback
+    for (const layer of this.layers.values()) {
+      layer.audio.volume = layer.isMuted ? 0 : layer.userVolume * safeVolume;
     }
   }
 

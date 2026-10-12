@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { audioEngine } from '@/audio/audio-engine';
-import { SoundTrack, PlaybackStatus, AtmospherePreset, CustomMix, SleepTimerState } from '@/types';
+import { SoundTrack, PlaybackStatus, AtmospherePreset, CustomMix, SleepTimerState, ThemeMode } from '@/types';
 import { SOUND_TRACKS, getSoundById } from '@/data/sounds';
 
 interface PlayerStoreState {
@@ -15,6 +15,10 @@ interface PlayerStoreState {
   customMixes: CustomMix[];
   activePresetId: string | null;
   isMiniPlayerOpen: boolean;
+  themeMode: ThemeMode;
+  isNowPlayingDrawerOpen: boolean;
+  isShareModalOpen: boolean;
+  shareSoundId: string | null;
 
   // Actions
   playSingleSound: (sound: SoundTrack) => Promise<void>;
@@ -31,12 +35,25 @@ interface PlayerStoreState {
   toggleFavorite: (soundId: string) => void;
   setSleepTimer: (minutes: number) => void;
   cancelSleepTimer: () => void;
+  pauseSleepTimer: () => void;
+  resumeSleepTimer: () => void;
+  syncSleepTimer: () => void;
   tickSleepTimer: () => void;
   openMiniPlayer: () => void;
   closeMiniPlayer: () => void;
+  setThemeMode: (mode: ThemeMode) => void;
+  openNowPlayingDrawer: () => void;
+  closeNowPlayingDrawer: () => void;
+  toggleNowPlayingDrawer: () => void;
+  openShareModal: (soundId?: string) => void;
+  closeShareModal: () => void;
+  playNextSound: () => Promise<void>;
+  playPrevSound: () => Promise<void>;
 }
 
 let timerInterval: ReturnType<typeof setInterval> | null = null;
+let audioTickUnsub: (() => void) | null = null;
+let isFadingOut: boolean = false;
 
 export const usePlayerStore = create<PlayerStoreState>()(
   persist(
@@ -58,6 +75,10 @@ export const usePlayerStore = create<PlayerStoreState>()(
       customMixes: [],
       activePresetId: null,
       isMiniPlayerOpen: true,
+      themeMode: 'motive',
+      isNowPlayingDrawerOpen: false,
+      isShareModalOpen: false,
+      shareSoundId: null,
 
       playSingleSound: async (sound: SoundTrack) => {
         const currentLayers: Record<string, { volume: number; isMuted: boolean; isPlaying: boolean }> = { ...get().activeLayers };
@@ -81,11 +102,18 @@ export const usePlayerStore = create<PlayerStoreState>()(
 
         try {
           await audioEngine.playExclusive(sound.id, sound.audioSrc, sound.defaultVolume);
+          audioEngine.updateMediaSession(sound, true);
           set({
             currentSound: sound,
             playbackStatus: 'playing',
             activeLayers: currentLayers,
           });
+
+          // If a sleep timer was paused, auto-resume countdown
+          const { sleepTimer } = get();
+          if (sleepTimer.isRunning && sleepTimer.isPaused) {
+            get().resumeSleepTimer();
+          }
         } catch (error) {
           console.warn('Playback error caught, cleanly falling back to paused:', error);
           set({ playbackStatus: 'paused' });
@@ -101,7 +129,16 @@ export const usePlayerStore = create<PlayerStoreState>()(
           Object.keys(currentLayers).forEach((key) => {
             currentLayers[key] = { ...currentLayers[key], isPlaying: false };
           });
+          if (currentSound) {
+            audioEngine.updateMediaSession(currentSound, false);
+          }
           set({ playbackStatus: 'paused', activeLayers: currentLayers });
+
+          // Pause sleep timer countdown while audio is paused
+          const { sleepTimer } = get();
+          if (sleepTimer.isRunning && !sleepTimer.isPaused) {
+            get().pauseSleepTimer();
+          }
         } else if (playbackStatus === 'paused') {
           const soundToPlay = currentSound || SOUND_TRACKS[0];
           await get().playSingleSound(soundToPlay);
@@ -118,6 +155,7 @@ export const usePlayerStore = create<PlayerStoreState>()(
           currentLayers[key] = { ...currentLayers[key], isPlaying: false };
         });
         set({ playbackStatus: 'stopped', activeLayers: currentLayers });
+        get().cancelSleepTimer();
       },
 
       setMasterVolume: (vol: number) => {
@@ -227,17 +265,37 @@ export const usePlayerStore = create<PlayerStoreState>()(
       setSleepTimer: (minutes: number) => {
         get().cancelSleepTimer();
         const totalSeconds = minutes * 60;
+        const targetEndTime = Date.now() + totalSeconds * 1000;
+        isFadingOut = false;
+
         set({
           sleepTimer: {
             durationMinutes: minutes,
             remainingSeconds: totalSeconds,
             isRunning: true,
+            isPaused: false,
+            targetEndTime,
           },
         });
 
+        // If audio isn't currently playing, auto-start current sound or first calm soundscape
+        const { playbackStatus, currentSound } = get();
+        if (playbackStatus !== 'playing') {
+          const soundToPlay = currentSound || SOUND_TRACKS[0];
+          get().playSingleSound(soundToPlay);
+        }
+
+        // Active 1-second interval ticker for UI in foreground
         timerInterval = setInterval(() => {
           get().tickSleepTimer();
         }, 1000);
+
+        // Native timeupdate listener for mobile background / screen-off execution
+        if (!audioTickUnsub) {
+          audioTickUnsub = audioEngine.onAudioTick(() => {
+            get().tickSleepTimer();
+          });
+        }
       },
 
       cancelSleepTimer: () => {
@@ -245,31 +303,113 @@ export const usePlayerStore = create<PlayerStoreState>()(
           clearInterval(timerInterval);
           timerInterval = null;
         }
+        if (audioTickUnsub) {
+          audioTickUnsub();
+          audioTickUnsub = null;
+        }
+        isFadingOut = false;
         audioEngine.cancelSleepTimer();
         set({
           sleepTimer: {
             durationMinutes: 0,
             remainingSeconds: 0,
             isRunning: false,
+            isPaused: false,
+            targetEndTime: null,
           },
         });
       },
 
+      pauseSleepTimer: () => {
+        const { sleepTimer } = get();
+        if (!sleepTimer.isRunning || sleepTimer.isPaused) return;
+
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
+        const now = Date.now();
+        const remaining = sleepTimer.targetEndTime
+          ? Math.max(0, Math.ceil((sleepTimer.targetEndTime - now) / 1000))
+          : sleepTimer.remainingSeconds;
+
+        set({
+          sleepTimer: {
+            ...sleepTimer,
+            remainingSeconds: remaining,
+            isPaused: true,
+            targetEndTime: null,
+          },
+        });
+      },
+
+      resumeSleepTimer: () => {
+        const { sleepTimer } = get();
+        if (!sleepTimer.isRunning || !sleepTimer.isPaused) return;
+
+        const targetEndTime = Date.now() + sleepTimer.remainingSeconds * 1000;
+        isFadingOut = false;
+
+        set({
+          sleepTimer: {
+            ...sleepTimer,
+            isPaused: false,
+            targetEndTime,
+          },
+        });
+
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          get().tickSleepTimer();
+        }, 1000);
+
+        if (!audioTickUnsub) {
+          audioTickUnsub = audioEngine.onAudioTick(() => {
+            get().tickSleepTimer();
+          });
+        }
+      },
+
+      syncSleepTimer: () => {
+        const { sleepTimer } = get();
+        if (!sleepTimer.isRunning || sleepTimer.isPaused || !sleepTimer.targetEndTime) return;
+
+        const now = Date.now();
+        const remaining = Math.max(0, Math.ceil((sleepTimer.targetEndTime - now) / 1000));
+
+        if (remaining <= 0) {
+          isFadingOut = false;
+          get().cancelSleepTimer();
+          get().stopPlayback();
+        } else {
+          set({
+            sleepTimer: {
+              ...sleepTimer,
+              remainingSeconds: remaining,
+            },
+          });
+        }
+      },
+
       tickSleepTimer: () => {
         const { sleepTimer } = get();
-        if (!sleepTimer.isRunning) return;
+        if (!sleepTimer.isRunning || sleepTimer.isPaused || !sleepTimer.targetEndTime) return;
 
-        const remaining = sleepTimer.remainingSeconds - 1;
+        const now = Date.now();
+        const remaining = Math.max(0, Math.ceil((sleepTimer.targetEndTime - now) / 1000));
 
-        // When 30 seconds remain, initiate Web Audio exponential volume fade down
-        if (remaining === 30) {
-          audioEngine.startSleepTimerFade(30, () => {
+        // When 30 seconds remain (or less), initiate smooth volume fade-out
+        if (remaining <= 30 && remaining > 0 && !isFadingOut) {
+          isFadingOut = true;
+          audioEngine.startSleepTimerFade(remaining, () => {
             get().cancelSleepTimer();
             get().stopPlayback();
           });
         }
 
         if (remaining <= 0) {
+          isFadingOut = false;
           get().cancelSleepTimer();
           get().stopPlayback();
           return;
@@ -285,6 +425,33 @@ export const usePlayerStore = create<PlayerStoreState>()(
 
       openMiniPlayer: () => set({ isMiniPlayerOpen: true }),
       closeMiniPlayer: () => set({ isMiniPlayerOpen: false }),
+
+      setThemeMode: (mode: ThemeMode) => set({ themeMode: mode }),
+      openNowPlayingDrawer: () => set({ isNowPlayingDrawerOpen: true }),
+      closeNowPlayingDrawer: () => set({ isNowPlayingDrawerOpen: false }),
+      toggleNowPlayingDrawer: () =>
+        set((state) => ({ isNowPlayingDrawerOpen: !state.isNowPlayingDrawerOpen })),
+
+      openShareModal: (soundId?: string) =>
+        set({
+          isShareModalOpen: true,
+          shareSoundId: soundId || get().currentSound?.id || 'rain',
+        }),
+      closeShareModal: () => set({ isShareModalOpen: false, shareSoundId: null }),
+
+      playNextSound: async () => {
+        const { currentSound } = get();
+        const idx = SOUND_TRACKS.findIndex((s) => s.id === currentSound?.id);
+        const nextIdx = (idx + 1) % SOUND_TRACKS.length;
+        await get().playSingleSound(SOUND_TRACKS[nextIdx]);
+      },
+
+      playPrevSound: async () => {
+        const { currentSound } = get();
+        const idx = SOUND_TRACKS.findIndex((s) => s.id === currentSound?.id);
+        const prevIdx = (idx - 1 + SOUND_TRACKS.length) % SOUND_TRACKS.length;
+        await get().playSingleSound(SOUND_TRACKS[prevIdx]);
+      },
     }),
     {
       name: 'stillwave-player-storage',
@@ -294,7 +461,43 @@ export const usePlayerStore = create<PlayerStoreState>()(
         favorites: state.favorites,
         customMixes: state.customMixes,
         activeLayers: state.activeLayers,
+        themeMode: state.themeMode,
       }),
     }
   )
 );
+
+// Client-side background visibility & MediaSession setup
+if (typeof window !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      usePlayerStore.getState().syncSleepTimer();
+    }
+  });
+
+  audioEngine.setupMediaSessionHandlers({
+    onPlay: () => {
+      usePlayerStore.getState().togglePlayPause();
+    },
+    onPause: () => {
+      usePlayerStore.getState().togglePlayPause();
+    },
+    onStop: () => {
+      usePlayerStore.getState().stopPlayback();
+    },
+    onNext: () => {
+      const state = usePlayerStore.getState();
+      const current = state.currentSound;
+      const idx = SOUND_TRACKS.findIndex((s) => s.id === current?.id);
+      const nextIdx = (idx + 1) % SOUND_TRACKS.length;
+      state.playSingleSound(SOUND_TRACKS[nextIdx]);
+    },
+    onPrev: () => {
+      const state = usePlayerStore.getState();
+      const current = state.currentSound;
+      const idx = SOUND_TRACKS.findIndex((s) => s.id === current?.id);
+      const prevIdx = (idx - 1 + SOUND_TRACKS.length) % SOUND_TRACKS.length;
+      state.playSingleSound(SOUND_TRACKS[prevIdx]);
+    },
+  });
+}

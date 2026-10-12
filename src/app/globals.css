@@ -187,3 +187,226 @@ input[type="range"]::-moz-range-thumb {
   animation: fadeIn 0.25s ease-out forwards;
 }
 
+/* =========================================================================
+   LIGHT BEIGE THEME SYSTEM (Editorial Kinfolk & Aesop Light Mode)
+   ========================================================================= */
+
+.theme-light-beige {
+  --deep-forest: #F6F3EB;
+  --moss-slate: #EBE5DA;
+  --moss-elevated: #DFD8CC;
+  --sage-mist: #6E6051;
+  --sage-light: #574B3E;
+  --warm-fog: #4D534E;
+  --text-primary: #1C1E1B;
+  --text-secondary: #4D534E;
+  --text-muted: #78807A;
+  --border-subtle: rgba(110, 96, 81, 0.20);
+  --border-active: rgba(110, 96, 81, 0.50);
+
+  --theme-bg: #F6F3EB;
+  --theme-surface: #EFEAE0;
+  --theme-elevated: #E5DFD4;
+  --theme-hover: #DFD9CD;
+  --theme-accent: #6E6051;
+  --theme-accent-hover: #574B3E;
+  --theme-accent-rgb: 110, 96, 81;
+  --theme-glow: rgba(110, 96, 81, 0.14);
+  --theme-glow-sec: rgba(110, 96, 81, 0.06);
+  --theme-border-subtle: rgba(110, 96, 81, 0.22);
+  --theme-border-active: rgba(110, 96, 81, 0.50);
+  --theme-text-primary: #1C1E1B;
+  --theme-text-secondary: #4D534E;
+  --theme-text-muted: #78807A;
+  --theme-text-accent: #574B3E;
+  color-scheme: light;
+}
+
+.theme-light-beige body {
+  background-color: #F6F3EB !important;
+  color: #1C1E1B !important;
+}
+
+/* Light Beige Scrollbars */
+.theme-light-beige::-webkit-scrollbar-track {
+  background: #F6F3EB;
+}
+.theme-light-beige::-webkit-scrollbar-thumb {
+  background: #DFD8CC;
+}
+.theme-light-beige::-webkit-scrollbar-thumb:hover {
+  background: #CFC5B6;
+}
+
+/* Headings and Primary Titles in Light Beige */
+.theme-light-beige h1,
+.theme-light-beige h2,
+.theme-light-beige h3,
+.theme-light-beige .text-\[\#F1F3EF\],
+.theme-light-beige .text-\[\#D8D6C9\],
+.theme-light-beige .text-\[var\(--theme-text-primary\,\#F1F3EF\)\] {
+  color: #1C1E1B !important;
+}
+
+/* Subtitles, Descriptions and Copy in Light Beige */
+.theme-light-beige p,
+.theme-light-beige .text-\[\#B3BDB6\],
+.theme-light-beige .text-\[var\(--theme-text-secondary\,\#B3BDB6\)\] {
+  color: #4D534E !important;
+}
+
+/* Captions, Timestamps, Labels in Light Beige */
+.theme-light-beige .text-\[\#7E8D86\],
+.theme-light-beige .text-\[\#7A8E89\],
+.theme-light-beige .text-\[var\(--theme-text-muted\,\#7E8D86\)\] {
+  color: #78807A !important;
+}
+
+/* Glass Panels and Nav in Light Beige */
+.theme-light-beige .glass-panel {
+  background: rgba(239, 234, 224, 0.86) !important;
+  border-color: rgba(110, 96, 81, 0.22) !important;
+  box-shadow: 0 20px 45px -15px rgba(110, 96, 81, 0.14) !important;
+}
+
+.theme-light-beige .glass-nav {
+  background: rgba(246, 243, 235, 0.90) !important;
+  border-color: rgba(110, 96, 81, 0.18) !important;
+  box-shadow: 0 4px 24px rgba(110, 96, 81, 0.08) !important;
+}
+
+/* Bottom Floating Dock (MiniPlayer) in Light Beige */
+.theme-light-beige [role="region"][aria-label="Audio player dock"] > div {
+  background: rgba(246, 243, 235, 0.94) !important;
+  border-color: rgba(110, 96, 81, 0.28) !important;
+  box-shadow: 0 20px 50px -10px rgba(110, 96, 81, 0.22) !important;
+}
+
+.theme-light-beige [role="region"][aria-label="Audio player dock"] .bg-black\/30,
+.theme-light-beige [role="region"][aria-label="Audio player dock"] .bg-black\/20 {
+  background: rgba(229, 223, 212, 0.90) !important;
+  border-color: rgba(110, 96, 81, 0.20) !important;
+  color: #1C1E1B !important;
+}
+
+/* Right-Edge Now Playing Sliding Drawer in Light Beige */
+.theme-light-beige aside[aria-label="Now Playing Drawer"] {
+  background: rgba(246, 243, 235, 0.98) !important;
+  border-left-color: rgba(110, 96, 81, 0.25) !important;
+  box-shadow: -15px 0 50px rgba(110, 96, 81, 0.18) !important;
+  color: #1C1E1B !important;
+}
+
+.theme-light-beige aside[aria-label="Now Playing Drawer"] .border-b,
+.theme-light-beige aside[aria-label="Now Playing Drawer"] .border-t,
+.theme-light-beige aside[aria-label="Now Playing Drawer"] .border-white\/10,
+.theme-light-beige aside[aria-label="Now Playing Drawer"] .border-white\/5 {
+  border-color: rgba(110, 96, 81, 0.20) !important;
+}
+
+.theme-light-beige aside[aria-label="Now Playing Drawer"] .bg-black\/40,
+.theme-light-beige aside[aria-label="Now Playing Drawer"] .bg-black\/30,
+.theme-light-beige aside[aria-label="Now Playing Drawer"] .bg-black\/20 {
+  background: rgba(239, 234, 224, 0.88) !important;
+  border-color: rgba(110, 96, 81, 0.20) !important;
+  color: #1C1E1B !important;
+}
+
+/* Floating Vertical Right Edge Tab in Light Beige */
+.theme-light-beige button[aria-label="Toggle Now Playing Drawer"] {
+  background: rgba(246, 243, 235, 0.96) !important;
+  border-color: rgba(110, 96, 81, 0.25) !important;
+  color: #1C1E1B !important;
+  box-shadow: -4px 10px 25px rgba(110, 96, 81, 0.15) !important;
+}
+
+/* Modals & Dialogs in Light Beige */
+.theme-light-beige [role="dialog"] {
+  background: #F6F3EB !important;
+  border-color: rgba(110, 96, 81, 0.25) !important;
+  color: #1C1E1B !important;
+}
+
+.theme-light-beige [role="dialog"] .bg-black\/30,
+.theme-light-beige [role="dialog"] .bg-black\/20,
+.theme-light-beige [role="dialog"] .bg-black\/40,
+.theme-light-beige [role="dialog"] .bg-\[\#101816\],
+.theme-light-beige [role="dialog"] .bg-\[\#202B28\],
+.theme-light-beige [role="dialog"] .bg-\[\#283633\] {
+  background: rgba(239, 234, 224, 0.90) !important;
+  border-color: rgba(110, 96, 81, 0.22) !important;
+  color: #1C1E1B !important;
+}
+
+.theme-light-beige [role="dialog"] input {
+  background: #EFEAE0 !important;
+  border-color: rgba(110, 96, 81, 0.3) !important;
+  color: #1C1E1B !important;
+}
+
+/* Dark Section Blocks In Light Beige */
+.theme-light-beige .bg-\[\#101816\],
+.theme-light-beige .bg-\[\#202B28\],
+.theme-light-beige .bg-\[\#283633\] {
+  background-color: #EFEAE0 !important;
+}
+
+.theme-light-beige .border-\[\#202B28\],
+.theme-light-beige .border-\[\#283633\],
+.theme-light-beige .border-\[\#91AFA9\]\/20,
+.theme-light-beige .border-\[\#91AFA9\]\/25,
+.theme-light-beige .border-\[\#91AFA9\]\/30 {
+  border-color: rgba(110, 96, 81, 0.22) !important;
+}
+
+/* Sound Cards in Light Beige: High-Contrast Badges & Accents */
+.theme-light-beige [role="button"][aria-label^="Soundscape card"] {
+  border-color: rgba(110, 96, 81, 0.22) !important;
+  box-shadow: 0 10px 30px -10px rgba(110, 96, 81, 0.15) !important;
+}
+
+.theme-light-beige [role="button"][aria-label^="Soundscape card"]:hover {
+  border-color: rgba(110, 96, 81, 0.50) !important;
+  box-shadow: 0 20px 40px -10px rgba(110, 96, 81, 0.22) !important;
+}
+
+/* Top floating badge and buttons on sound cards */
+.theme-light-beige [role="button"][aria-label^="Soundscape card"] .bg-\[\#101816\]\/85,
+.theme-light-beige [role="button"][aria-label^="Soundscape card"] .bg-\[\#101816\]\/75 {
+  background-color: rgba(246, 243, 235, 0.94) !important;
+  border-color: rgba(110, 96, 81, 0.30) !important;
+  color: #1C1E1B !important;
+  box-shadow: 0 2px 8px rgba(110, 96, 81, 0.12) !important;
+}
+
+.theme-light-beige [role="button"][aria-label^="Soundscape card"] .bg-\[\#101816\]\/85 span,
+.theme-light-beige [role="button"][aria-label^="Soundscape card"] .bg-\[\#101816\]\/75 svg {
+  color: #1C1E1B !important;
+}
+
+/* Retain high readability for sound title & description over card photo */
+.theme-light-beige [role="button"][aria-label^="Soundscape card"] h3 {
+  color: #F1F3EF !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85) !important;
+}
+
+.theme-light-beige [role="button"][aria-label^="Soundscape card"] p {
+  color: #D8D6C9 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85) !important;
+}
+
+.theme-light-beige [role="button"][aria-label^="Soundscape card"] .font-mono {
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Primary Accent & Action Buttons */
+.theme-light-beige .bg-\[var\(--theme-accent\,\#91AFA9\)\] {
+  background-color: #6E6051 !important;
+  color: #F6F3EB !important;
+}
+
+/* Semi-transparent scrim backdrops */
+.theme-light-beige .bg-black\/60 {
+  background-color: rgba(45, 38, 30, 0.50) !important;
+}
+

@@ -2,6 +2,8 @@ export type SoundCategory = 'rain' | 'ocean' | 'forest' | 'fireplace' | 'wind' |
 
 export type PlaybackStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'stopped' | 'switching' | 'error';
 
+export type ThemeMode = 'motive' | 'beige' | 'cold';
+
 export interface SoundTrack {
   id: string;
   title: string;
@@ -13,6 +15,8 @@ export interface SoundTrack {
   artwork: string;
   tintColor: string; // e.g., for local accents
   defaultVolume: number;
+  frequencyLabel?: string;
+  recommendations?: string[];
 }
 
 export interface ActiveLayer {
@@ -51,4 +55,6 @@ export interface SleepTimerState {
   durationMinutes: number;
   remainingSeconds: number;
   isRunning: boolean;
+  isPaused?: boolean;
+  targetEndTime?: number | null;
 }

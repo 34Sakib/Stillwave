@@ -1,237 +1,139 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import {
   Play,
   Pause,
-  Square,
-  Volume2,
-  VolumeX,
   Moon,
-  ChevronUp,
-  X,
-  Sliders,
-  AlertCircle,
-  Loader2,
-  CloudRain,
+  Volume2,
+  PanelRight,
 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/player-store';
-import { useRainStore } from '@/stores/rain-store';
-import { SleepTimerModal } from '@/components/ui/sleep-timer-modal';
+import { SOUND_TRACKS } from '@/data/sounds';
 
 export const MiniPlayer: React.FC = () => {
   const {
     currentSound,
     playbackStatus,
     togglePlayPause,
-    stopPlayback,
     masterVolume,
     setMasterVolume,
     sleepTimer,
-    isMiniPlayerOpen,
-    closeMiniPlayer,
-    openMiniPlayer,
-    activeLayers,
+    openNowPlayingDrawer,
+    toggleNowPlayingDrawer,
   } = usePlayerStore();
 
-  const [timerModalOpen, setTimerModalOpen] = useState(false);
-
-  // If no sound has been selected yet or mini-player closed, show floating pill
-  if (!currentSound || !isMiniPlayerOpen) {
-    if (playbackStatus === 'playing' && currentSound) {
-      return (
-        <div className="fixed bottom-4 right-4 z-40">
-          <button
-            onClick={openMiniPlayer}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-[var(--theme-surface,#202B28)]/95 border border-[var(--theme-border-active,rgba(145,175,169,0.4))] text-[#F1F3EF] shadow-2xl hover:border-[var(--theme-accent,#91AFA9)] backdrop-blur-md transition-all active:scale-95"
-            aria-label="Re-open audio player"
-          >
-            <div className="w-2 h-2 rounded-full bg-[var(--theme-accent,#91AFA9)] animate-pulse" />
-            <span className="text-xs font-medium font-mono max-w-[110px] truncate">
-              {currentSound.title}
-            </span>
-            <ChevronUp className="w-3.5 h-3.5 text-[var(--theme-accent,#91AFA9)]" />
-          </button>
-        </div>
-      );
-    }
-    return null;
-  }
-
   const isPlaying = playbackStatus === 'playing';
-  const isLoading = playbackStatus === 'loading' || playbackStatus === 'switching';
-  const isError = playbackStatus === 'error';
-  const activeLayersCount = Object.values(activeLayers).filter((l) => l.isPlaying).length;
+  const sound = currentSound || SOUND_TRACKS[0];
+
+  const formatTimerLabel = () => {
+    if (!sleepTimer.isRunning) return 'Timer';
+    if (sleepTimer.isPaused) return 'Paused';
+    const mins = Math.floor(sleepTimer.remainingSeconds / 60);
+    const secs = sleepTimer.remainingSeconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <>
-      <div
-        className="fixed bottom-0 left-0 right-0 z-40 px-2 sm:px-6 pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-2 bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none"
-        role="region"
-        aria-label="Persistent Mini Audio Player"
-      >
-        <div className="max-w-5xl mx-auto glass-panel rounded-2xl p-2.5 sm:px-5 sm:py-3.5 border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] shadow-2xl flex items-center justify-between gap-2 sm:gap-6 pointer-events-auto transition-colors duration-1000">
-          {/* Left: Artwork, Track Info, State Badges */}
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] shrink-0 bg-[var(--theme-bg,#101816)]">
-              <Image
-                src={currentSound.artwork}
-                alt={currentSound.title}
-                fill
-                sizes="44px"
-                className="object-cover"
-              />
-              {isPlaying && (
-                <div className="absolute inset-0 bg-[var(--theme-accent,#91AFA9)]/20 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-[var(--theme-accent,#91AFA9)] animate-ping" />
-                </div>
-              )}
-            </div>
-
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <a
-                  href="#listening-room"
-                  className="text-xs sm:text-sm font-medium text-[#F1F3EF] hover:text-[var(--theme-accent,#91AFA9)] transition-colors truncate block max-w-[140px] xs:max-w-[180px] sm:max-w-[240px]"
-                  title="Go to Listening Lounge"
-                >
-                  {currentSound.title}
-                </a>
-              </div>
-
-              <div className="flex items-center gap-2 text-[10px] text-[#B3BDB6] font-mono">
-                {isLoading ? (
-                  <span className="text-[#D8D6C9] flex items-center gap-1">
-                    <Loader2 className="w-2.5 h-2.5 animate-spin text-[var(--theme-accent,#91AFA9)]" />
-                    Fading in...
-                  </span>
-                ) : isError ? (
-                  <span className="text-rose-400 flex items-center gap-1">
-                    <AlertCircle className="w-2.5 h-2.5" />
-                    Error
-                  </span>
-                ) : isPlaying ? (
-                  <span className="text-[var(--theme-accent,#91AFA9)]">Playing</span>
-                ) : (
-                  <span>Paused</span>
-                )}
-
-                {sleepTimer.isRunning && (
-                  <span className="text-[#D8D6C9] truncate">
-                    • {Math.floor(sleepTimer.remainingSeconds / 60)}m
-                  </span>
-                )}
-              </div>
-            </div>
+    <div
+      className="fixed left-1/2 -translate-x-1/2 bottom-4 sm:bottom-6 z-40 w-[calc(100%-24px)] max-w-4xl"
+      role="region"
+      aria-label="Audio player dock"
+    >
+      <div className="flex items-center justify-between gap-3 sm:gap-5 px-3.5 py-2.5 rounded-full bg-[var(--theme-surface,#101816)]/80 backdrop-blur-2xl border border-[var(--theme-border,#91AFA9)]/30 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] transition-all duration-700">
+        {/* Left: Thumbnail & Title (Clicking opens the Now Playing drawer) */}
+        <button
+          type="button"
+          onClick={openNowPlayingDrawer}
+          className="flex items-center gap-3 min-w-0 text-left hover:opacity-90 transition-opacity cursor-pointer flex-1"
+          aria-label="Open now playing drawer"
+        >
+          <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] shadow-sm bg-black/30">
+            <img
+              src={sound.artwork}
+              alt={sound.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
           </div>
 
-          {/* Center: Playback Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Play/Pause Button */}
-            <button
-              onClick={togglePlayPause}
-              disabled={isLoading}
-              className="p-2.5 sm:p-3 rounded-xl bg-[var(--theme-accent,#91AFA9)] text-[#101816] hover:bg-[var(--theme-accent-hover,#B4CCC7)] active:scale-95 transition-all shadow-md"
-              aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
-            >
-              {isLoading ? (
-                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin text-[#101816]" />
-              ) : isPlaying ? (
-                <Pause className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
-              ) : (
-                <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" />
-              )}
-            </button>
-
-            {/* Stop button */}
-            <button
-              onClick={stopPlayback}
-              className="p-2 sm:p-2.5 rounded-xl bg-[var(--theme-bg,#101816)] text-[#B3BDB6] hover:text-[#F1F3EF] hover:bg-[var(--theme-elevated,#283633)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] transition-colors"
-              title="Stop playback"
-              aria-label="Stop playback"
-            >
-              <Square className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
-            </button>
-          </div>
-
-          {/* Right: Master Volume Slider & Sleep & Dismiss */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {/* Volume Control (hidden on mobile) */}
-            <div className="hidden lg:flex items-center gap-2 w-28 xl:w-32">
-              <button
-                onClick={() => setMasterVolume(masterVolume > 0 ? 0 : 0.8)}
-                className="text-[#B3BDB6] hover:text-[#F1F3EF] transition-colors"
-                title="Toggle Mute"
-              >
-                {masterVolume === 0 ? (
-                  <VolumeX className="w-3.5 h-3.5 text-rose-400" />
-                ) : (
-                  <Volume2 className="w-3.5 h-3.5 text-[#91AFA9]" />
-                )}
-              </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={masterVolume}
-                onChange={(e) => setMasterVolume(parseFloat(e.target.value))}
-                className="w-full"
-                aria-label="Master volume"
-              />
+          <div className="min-w-0 pr-1">
+            <div className="font-heading font-medium text-sm text-[var(--theme-text-primary,#F1F3EF)] truncate">
+              {currentSound ? sound.title : 'Nothing playing'}
             </div>
+            <div className="text-[11px] text-[var(--theme-text-secondary,#B3BDB6)] truncate font-sans">
+              {currentSound ? sound.subtitle : 'Choose a soundscape to begin'}
+            </div>
+          </div>
+        </button>
 
-            {/* Tune Rain button if rain is playing or active */}
-            {(activeLayers.rain?.isPlaying || currentSound.id === 'rain') && (
-              <button
-                onClick={() => useRainStore.getState().openCustomizer()}
-                className="p-2 rounded-xl bg-sky-500/15 border border-sky-500/35 text-sky-300 hover:bg-sky-500/25 transition-all"
-                title="Tune Realistic Rain Generator"
-                aria-label="Tune Rain Ambience"
-              >
-                <CloudRain className="w-3.5 h-3.5 text-sky-400" />
-              </button>
-            )}
-
-            {/* Sleep Timer button */}
-            <button
-              onClick={() => setTimerModalOpen(true)}
-              className={`p-2 rounded-xl border transition-all ${
+        {/* Center/Right Controls: Timer, Volume, Drawer Toggle, Play/Pause */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Sleep Timer Button */}
+          <button
+            type="button"
+            onClick={openNowPlayingDrawer}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono border transition-all cursor-pointer ${
+              sleepTimer.isRunning
+                ? 'bg-[var(--theme-accent,#91AFA9)]/20 border-[var(--theme-accent,#91AFA9)] text-[var(--theme-accent,#91AFA9)] font-medium'
+                : 'bg-[var(--theme-elevated,#1A2623)] border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[var(--theme-text-secondary,#B3BDB6)] hover:text-[var(--theme-text-primary,#F1F3EF)] hover:border-[var(--theme-accent,#91AFA9)]'
+            }`}
+            title="Configure Sleep Timer"
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
                 sleepTimer.isRunning
-                  ? 'bg-[#91AFA9]/20 border-[#91AFA9] text-[#91AFA9]'
-                  : 'bg-[#101816] border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF]'
+                  ? sleepTimer.isPaused
+                    ? 'bg-amber-400'
+                    : 'bg-emerald-400 animate-pulse'
+                  : 'bg-transparent'
               }`}
-              title="Sleep Timer"
-              aria-label="Sleep timer"
-            >
-              <Moon className="w-3.5 h-3.5" />
-            </button>
+            />
+            <Moon className="w-3 h-3" />
+            <span className="hidden sm:inline">{formatTimerLabel()}</span>
+          </button>
 
-            {/* Open Mixer Anchor */}
-            <a
-              href="#atmosphere-mixer"
-              className="hidden sm:flex p-2 rounded-xl bg-[#101816] border border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF] transition-colors"
-              title="Open Multi-Track Mixer"
-              aria-label="Open atmosphere mixer"
-            >
-              <Sliders className="w-3.5 h-3.5 text-[#91AFA9]" />
-            </a>
-
-            {/* Minimize / Dismiss player */}
-            <button
-              onClick={closeMiniPlayer}
-              className="p-1 sm:p-1.5 rounded-lg text-[#7E8D86] hover:text-[#F1F3EF] hover:bg-[#101816] transition-colors"
-              title="Minimize player"
-              aria-label="Minimize player"
-            >
-              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </button>
+          {/* Inline Volume Slider (desktop/tablet) */}
+          <div className="hidden md:flex items-center gap-2 w-28 px-2 py-1 rounded-full bg-[var(--theme-elevated,#1A2623)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))]">
+            <Volume2 className="w-3.5 h-3.5 text-[var(--theme-text-secondary,#B3BDB6)] shrink-0" />
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={Math.round(masterVolume * 100)}
+              onChange={(e) => setMasterVolume(Number(e.target.value) / 100)}
+              className="w-full accent-[var(--theme-accent,#91AFA9)] cursor-pointer h-1"
+              aria-label="Dock volume slider"
+            />
           </div>
+
+          {/* Toggle Now Playing Drawer Button */}
+          <button
+            type="button"
+            onClick={toggleNowPlayingDrawer}
+            className="p-2 rounded-full bg-[var(--theme-elevated,#1A2623)] hover:bg-[var(--theme-hover,#243430)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[var(--theme-text-secondary,#B3BDB6)] hover:text-[var(--theme-text-primary,#F1F3EF)] transition-all cursor-pointer"
+            title="Toggle Now Playing Panel"
+            aria-label="Toggle now playing panel"
+          >
+            <PanelRight className="w-4 h-4 text-[var(--theme-accent,#91AFA9)]" />
+          </button>
+
+          {/* Large Circular Play/Pause Button */}
+          <button
+            type="button"
+            onClick={togglePlayPause}
+            className="w-11 h-11 rounded-full bg-[var(--theme-accent,#91AFA9)] text-[var(--theme-bg,#101816)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer"
+            aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+          >
+            {isPlaying ? (
+              <Pause className="w-4 h-4 fill-current" />
+            ) : (
+              <Play className="w-4 h-4 fill-current ml-0.5" />
+            )}
+          </button>
         </div>
       </div>
-
-      <SleepTimerModal isOpen={timerModalOpen} onClose={() => setTimerModalOpen(false)} />
-    </>
+    </div>
   );
 };

@@ -19,6 +19,7 @@ import {
   Droplets,
   Radio,
   CloudLightning,
+  Share2,
 } from 'lucide-react';
 import { SoundTrack } from '@/types';
 import { usePlayerStore } from '@/stores/player-store';
@@ -69,6 +70,7 @@ export const SoundCard: React.FC<SoundCardProps> = ({
     activeLayers,
     favorites,
     toggleFavorite,
+    openShareModal,
   } = usePlayerStore();
 
   const isLayerActive = activeLayers[sound.id]?.isPlaying;
@@ -132,18 +134,34 @@ export const SoundCard: React.FC<SoundCardProps> = ({
           <span>{sound.category}</span>
         </span>
 
-        <button
-          onClick={handleFavoriteToggle}
-          className={`p-2 sm:p-2.5 rounded-full backdrop-blur-md border transition-all pointer-events-auto min-w-[34px] min-h-[34px] flex items-center justify-center ${
-            isFav
-              ? 'bg-rose-950/70 border-rose-500/40 text-rose-300'
-              : 'bg-[#101816]/75 border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF]'
-          }`}
-          title={isFav ? 'Remove from favorites' : 'Add to favorites'}
-          aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
-        >
-          <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
-        </button>
+        <div className="flex items-center gap-1.5 pointer-events-auto">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              openShareModal(sound.id);
+            }}
+            className="p-2 sm:p-2.5 rounded-full backdrop-blur-md border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] bg-[#101816]/75 text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-white/30 transition-all flex items-center justify-center min-w-[34px] min-h-[34px]"
+            title={`Share ${sound.title}`}
+            aria-label={`Share ${sound.title}`}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleFavoriteToggle}
+            className={`p-2 sm:p-2.5 rounded-full backdrop-blur-md border transition-all min-w-[34px] min-h-[34px] flex items-center justify-center ${
+              isFav
+                ? 'bg-rose-950/70 border-rose-500/40 text-rose-300'
+                : 'bg-[#101816]/75 border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF]'
+            }`}
+            title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+            aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {/* Card Body */}
