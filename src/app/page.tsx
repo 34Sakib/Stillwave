@@ -2,6 +2,7 @@ import React from 'react';
 import { Navbar } from '@/components/navigation/navbar';
 import { HeroSection } from '@/components/hero/hero-section';
 import { SoundscapeCarousel } from '@/components/sound-library/soundscape-carousel';
+import { CircadianSection } from '@/components/sections/circadian-section';
 import { ListeningRoom } from '@/components/audio-player/listening-room';
 import { SoundMixer } from '@/components/sound-mixer/sound-mixer';
 import { IntentionsSection } from '@/components/sections/intentions-section';
@@ -25,7 +26,10 @@ export default function HomePage() {
       {/* 02 · Soundscape Carousel */}
       <SoundscapeCarousel />
 
-      {/* 03 · Listening Room */}
+      {/* 03 · Circadian Rhythm (Tuned to Your Day) */}
+      <CircadianSection />
+
+      {/* 04 · Listening Room */}
       <ListeningRoom />
 
       {/* 04 · Build Your Atmosphere (Multi-track Mixer) */}

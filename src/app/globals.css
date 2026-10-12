@@ -427,3 +427,16 @@ input[type="range"]::-moz-range-thumb {
   border-color: rgba(110, 96, 81, 0.50);
 }
 
+/* Circadian Rhythm Section in Light Beige */
+.theme-light-beige #circadian button {
+  color: #1C1E1B;
+}
+
+.theme-light-beige #circadian .text-\[var\(--theme-text-primary\,\#F1F3EF\)\] {
+  color: #1C1E1B !important;
+}
+
+.theme-light-beige #circadian .text-\[var\(--theme-text-secondary\,\#B3BDB6\)\] {
+  color: #4D534E !important;
+}
+
