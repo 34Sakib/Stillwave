@@ -93,17 +93,11 @@ export const MiniPlayer: React.FC = () => {
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <a
                   href="#listening-room"
-                  className="text-xs sm:text-sm font-medium text-[#F1F3EF] hover:text-[var(--theme-accent,#91AFA9)] transition-colors truncate block max-w-[110px] xs:max-w-[150px] sm:max-w-[220px]"
+                  className="text-xs sm:text-sm font-medium text-[#F1F3EF] hover:text-[var(--theme-accent,#91AFA9)] transition-colors truncate block max-w-[140px] xs:max-w-[180px] sm:max-w-[240px]"
                   title="Go to Listening Lounge"
                 >
                   {currentSound.title}
                 </a>
-
-                {activeLayersCount > 1 && (
-                  <span className="hidden md:inline-block px-2 py-0.5 rounded-full text-[10px] font-mono bg-[var(--theme-accent,#91AFA9)]/20 text-[var(--theme-accent,#91AFA9)] border border-[var(--theme-accent,#91AFA9)]/20 shrink-0">
-                    +{activeLayersCount - 1} layers
-                  </span>
-                )}
               </div>
 
               <div className="flex items-center gap-2 text-[10px] text-[#B3BDB6] font-mono">

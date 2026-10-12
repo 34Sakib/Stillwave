@@ -85,18 +85,18 @@ export const SoundscapeCarousel: React.FC = () => {
             Choose Your Atmosphere
           </h2>
           <p className="text-xs sm:text-sm text-[#B3BDB6] max-w-xl mt-2 leading-relaxed">
-            Real, continuous natural acoustic soundscapes. Swipe or scroll horizontally to explore environments, or layer multiple tracks simultaneously in the mixer.
+            Real, continuous natural acoustic soundscapes. Swipe or scroll horizontally to explore environments and listen in pure uninterrupted stillness.
           </p>
         </div>
 
-        {/* Carousel Arrow Controls & Mixer Shortcut */}
+        {/* Carousel Arrow Controls & Console Shortcut */}
         <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
           <a
             href="#atmosphere-mixer"
             className="inline-flex items-center gap-1.5 text-xs text-[var(--theme-accent,#91AFA9)] hover:text-[#F1F3EF] transition-colors"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>Open Multi-Track Mixer</span>
+            <span>Open Acoustic Console</span>
           </a>
 
           <div className="flex items-center gap-2">

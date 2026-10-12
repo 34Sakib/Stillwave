@@ -9,16 +9,16 @@ export const EditorialSilence: React.FC = () => {
       <div className="relative text-center space-y-10 sm:space-y-12">
         {/* Subtle decorative acoustic sound wave line */}
         <div className="flex items-center justify-center gap-1.5 opacity-60">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#91AFA9]" />
-          <div className="w-8 h-[1px] bg-gradient-to-r from-transparent to-[#91AFA9]" />
-          <div className="w-16 h-[1.5px] bg-[#91AFA9]" />
-          <div className="w-8 h-[1px] bg-gradient-to-l from-transparent to-[#91AFA9]" />
-          <div className="w-1.5 h-1.5 rounded-full bg-[#91AFA9]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
+          <div className="w-8 h-[1px] bg-gradient-to-r from-transparent to-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
+          <div className="w-16 h-[1.5px] bg-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
+          <div className="w-8 h-[1px] bg-gradient-to-l from-transparent to-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
         </div>
 
         {/* Section Tag */}
         <div>
-          <span className="text-xs uppercase font-mono tracking-widest text-[#91AFA9]">
+          <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000">
             06 · Mindful Stillness
           </span>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#F1F3EF] mt-3 font-heading leading-tight px-2">
@@ -32,7 +32,7 @@ export const EditorialSilence: React.FC = () => {
             Silence in the modern world is rarely absolute. It is not the sterile void of an anechoic chamber, but the absence of cognitive friction — the gentle hush that allows your nervous system to exhale.
           </p>
 
-          <blockquote className="my-8 sm:my-10 py-5 px-5 sm:py-6 sm:px-8 rounded-2xl bg-[#202B28]/40 border-l-2 border-[#91AFA9] text-[#F1F3EF] italic font-serif text-lg sm:text-2xl leading-relaxed text-left">
+          <blockquote className="my-8 sm:my-10 py-5 px-5 sm:py-6 sm:px-8 rounded-2xl bg-[var(--theme-surface,#202B28)]/50 border-l-2 border-[var(--theme-accent,#91AFA9)] text-[#F1F3EF] italic font-serif text-lg sm:text-2xl leading-relaxed text-left transition-colors duration-1000">
             “When sound reflects the organic rhythm of the earth, the mind ceases guarding against noise and naturally returns to its center.”
           </blockquote>
 
@@ -43,7 +43,7 @@ export const EditorialSilence: React.FC = () => {
 
         {/* Delicate Acoustic Wave Graphic */}
         <div className="pt-8 flex items-center justify-center gap-2 text-[#7E8D86]">
-          <Feather className="w-4 h-4 text-[#91AFA9]" />
+          <Feather className="w-4 h-4 text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
           <span className="text-xs font-mono tracking-widest uppercase">
             Restrained · Organic · Restorative
           </span>

@@ -16,10 +16,10 @@ export const FooterSection: React.FC = () => {
   };
 
   return (
-    <footer id="about" className="relative mt-20 border-t border-[#91AFA9]/15 bg-[#101816] text-[#F1F3EF]">
+    <footer id="about" className="relative mt-20 border-t border-[var(--theme-border-subtle,rgba(145,175,169,0.15))] bg-[var(--theme-bg,#101816)] text-[#F1F3EF] transition-colors duration-1000">
       {/* Closing CTA Banner */}
       <div className="py-14 sm:py-20 px-4 sm:px-8 max-w-5xl mx-auto text-center space-y-5 sm:space-y-6">
-        <span className="text-xs uppercase font-mono tracking-widest text-[#91AFA9]">
+        <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000">
           08 · Quiet Conclusion
         </span>
         <h2 className="text-2xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#F1F3EF] font-heading px-2">
@@ -31,8 +31,9 @@ export const FooterSection: React.FC = () => {
 
         <div className="pt-4 flex items-center justify-center gap-4">
           <button
+            type="button"
             onClick={togglePlayPause}
-            className="px-6 py-3 rounded-xl bg-[#91AFA9] text-[#101816] font-medium text-xs hover:bg-[#B4CCC7] transition-all shadow-lg flex items-center gap-2"
+            className="px-6 py-3 rounded-xl bg-[var(--theme-accent,#91AFA9)] text-[#101816] font-medium text-xs hover:bg-[var(--theme-accent-hover,#B4CCC7)] transition-all shadow-lg flex items-center gap-2 cursor-pointer"
           >
             {isPlaying ? (
               <>
@@ -48,8 +49,9 @@ export const FooterSection: React.FC = () => {
           </button>
 
           <button
+            type="button"
             onClick={scrollToTop}
-            className="px-5 py-3 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF] text-xs transition-colors flex items-center gap-1.5"
+            className="px-5 py-3 rounded-xl bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF] text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <ArrowUp className="w-3.5 h-3.5" />
             <span>Top</span>
@@ -58,11 +60,11 @@ export const FooterSection: React.FC = () => {
       </div>
 
       {/* Directory & Metadata Columns */}
-      <div className="py-14 border-t border-[#91AFA9]/10 px-5 sm:px-8 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 text-xs">
+      <div className="py-14 border-t border-[var(--theme-border-subtle,rgba(145,175,169,0.1))] px-5 sm:px-8 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 text-xs">
         {/* Brand statement */}
         <div className="space-y-3 md:col-span-1">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#91AFA9]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
             <span className="text-sm font-medium tracking-[0.2em] font-heading uppercase text-[#F1F3EF]">
               Stillwave
             </span>
@@ -77,15 +79,16 @@ export const FooterSection: React.FC = () => {
 
         {/* Sound Library directory */}
         <div className="space-y-3">
-          <h4 className="font-mono uppercase tracking-wider text-[#91AFA9] text-[11px]">
+          <h4 className="font-mono uppercase tracking-wider text-[var(--theme-accent,#91AFA9)] text-[11px] transition-colors duration-1000">
             Sound Library
           </h4>
           <ul className="space-y-2 text-[#B3BDB6]">
             {SOUND_TRACKS.map((snd) => (
               <li key={snd.id}>
                 <button
+                  type="button"
                   onClick={() => playSingleSound(snd)}
-                  className="hover:text-[#F1F3EF] transition-colors text-left"
+                  className="hover:text-[#F1F3EF] transition-colors text-left cursor-pointer"
                 >
                   {snd.title} <span className="text-[#7E8D86]">({snd.category})</span>
                 </button>
@@ -96,38 +99,28 @@ export const FooterSection: React.FC = () => {
 
         {/* Experiences & Navigation */}
         <div className="space-y-3">
-          <h4 className="font-mono uppercase tracking-wider text-[#91AFA9] text-[11px]">
+          <h4 className="font-mono uppercase tracking-wider text-[var(--theme-accent,#91AFA9)] text-[11px] transition-colors duration-1000">
             Sanctuary Areas
           </h4>
           <ul className="space-y-2 text-[#B3BDB6]">
             <li>
               <a href="#soundscapes" className="hover:text-[#F1F3EF] transition-colors">
-                Soundscape Carousel
-              </a>
-            </li>
-            <li>
-              <a href="#listening-room" className="hover:text-[#F1F3EF] transition-colors">
-                Listening Lounge
-              </a>
-            </li>
-            <li>
-              <a href="#atmosphere-mixer" className="hover:text-[#F1F3EF] transition-colors">
-                Multi-Track Sound Mixer
+                Soundscapes
               </a>
             </li>
             <li>
               <a href="#intentions" className="hover:text-[#F1F3EF] transition-colors">
-                Curated Intentions
-              </a>
-            </li>
-            <li>
-              <a href="#beauty-of-silence" className="hover:text-[#F1F3EF] transition-colors">
-                The Beauty of Silence
+                Intentions
               </a>
             </li>
             <li>
               <a href="#ritual" className="hover:text-[#F1F3EF] transition-colors">
-                Daily Ritual Guide
+                Rituals
+              </a>
+            </li>
+            <li>
+              <a href="#atmosphere-mixer" className="hover:text-[#F1F3EF] transition-colors">
+                Acoustic Console Faders
               </a>
             </li>
           </ul>

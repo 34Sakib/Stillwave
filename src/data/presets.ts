@@ -79,4 +79,30 @@ export const INTENTION_PRESETS: AtmospherePreset[] = [
       { soundId: 'wind', volume: 0.80 },
     ],
   },
+  {
+    id: 'zen-presence',
+    title: 'Zen Temple Stillness',
+    subtitle: '432Hz harmonic presence',
+    description: 'Resonant Tibetan singing bowl harmonics and peaceful brass bell tones. Dissolves anxiety and brings effortless mindfulness.',
+    intention: 'Meditate',
+    iconName: 'Compass',
+    badge: '30m Session',
+    sleepTimerMinutes: 30,
+    layers: [
+      { soundId: 'zen-bowls', volume: 0.75 },
+    ],
+  },
+  {
+    id: 'delta-sleep-cocoon',
+    title: 'Delta Sleep Cocoon',
+    subtitle: 'Velvet noise sleep shield',
+    description: 'Continuous deep Brownian acoustic warmth that masks outside street noise and calms restless thoughts.',
+    intention: 'Sleep',
+    iconName: 'Moon',
+    badge: '60m Sleep Timer',
+    sleepTimerMinutes: 60,
+    layers: [
+      { soundId: 'brown-noise', volume: 0.75 },
+    ],
+  },
 ];

@@ -116,11 +116,9 @@ export const ListeningRoom: React.FC = () => {
                 <span className="text-xs font-mono uppercase tracking-widest text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000">
                   Active Ambience
                 </span>
-                {activeLayersCount > 1 && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-[var(--theme-accent,#91AFA9)]/20 text-[var(--theme-accent,#91AFA9)] border border-[var(--theme-accent,#91AFA9)]/30 transition-colors duration-1000">
-                    {activeLayersCount} Layered Tracks
-                  </span>
-                )}
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-[var(--theme-accent,#91AFA9)]/20 text-[var(--theme-accent,#91AFA9)] border border-[var(--theme-accent,#91AFA9)]/30 transition-colors duration-1000">
+                  {isPlaying ? 'Continuous Sanctuary' : 'Ready'}
+                </span>
               </div>
 
               <h3 className="text-2xl sm:text-4xl font-medium tracking-wide text-[#F1F3EF] mt-2 font-heading">
@@ -141,8 +139,9 @@ export const ListeningRoom: React.FC = () => {
                 <div className="flex items-center gap-3">
                   {/* Play / Pause Primary Button */}
                   <button
+                    type="button"
                     onClick={togglePlayPause}
-                    className="p-3.5 sm:p-4 rounded-2xl bg-[var(--theme-accent,#91AFA9)] text-[#101816] hover:bg-[var(--theme-accent-hover,#B4CCC7)] active:scale-95 transition-all shadow-xl font-medium"
+                    className="p-3.5 sm:p-4 rounded-2xl bg-[var(--theme-accent,#91AFA9)] text-[#101816] hover:bg-[var(--theme-accent-hover,#B4CCC7)] active:scale-95 transition-all shadow-xl font-medium cursor-pointer"
                     style={{
                       boxShadow: '0 10px 25px -5px rgba(var(--theme-accent-rgb, 145, 175, 169), 0.25)',
                     }}
@@ -157,8 +156,9 @@ export const ListeningRoom: React.FC = () => {
 
                   {/* Stop Button */}
                   <button
+                    type="button"
                     onClick={stopPlayback}
-                    className="p-3 sm:p-3.5 rounded-2xl bg-[var(--theme-surface,#202B28)] text-[#B3BDB6] hover:text-[#F1F3EF] hover:bg-[var(--theme-elevated,#283633)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] transition-all active:scale-95"
+                    className="p-3 sm:p-3.5 rounded-2xl bg-[var(--theme-surface,#202B28)] text-[#B3BDB6] hover:text-[#F1F3EF] hover:bg-[var(--theme-elevated,#283633)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] transition-all active:scale-95 cursor-pointer"
                     aria-label="Stop playback and reset"
                     title="Stop playback"
                   >
@@ -166,12 +166,13 @@ export const ListeningRoom: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Auxiliary Toggles: Loop & Sleep Timer & Mixer & Tune Rain */}
+                {/* Auxiliary Toggles */}
                 <div className="flex items-center gap-2 flex-wrap">
                   {(activeLayers.rain?.isPlaying || activeSound.id === 'rain') && (
                     <button
+                      type="button"
                       onClick={() => useRainStore.getState().openCustomizer()}
-                      className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-sky-500/15 border border-sky-500/35 text-sky-300 hover:bg-sky-500/25 text-xs font-medium transition-all shadow-sm"
+                      className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-sky-500/15 border border-sky-500/35 text-sky-300 hover:bg-sky-500/25 text-xs font-medium transition-all shadow-sm cursor-pointer"
                       title="Tune Realistic Rain Generator"
                     >
                       <CloudRain className="w-3.5 h-3.5 text-sky-400" />
@@ -180,7 +181,8 @@ export const ListeningRoom: React.FC = () => {
                   )}
 
                   <button
-                    className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-[#202B28] border border-[#91AFA9]/30 text-[#91AFA9] text-xs font-medium cursor-default"
+                    type="button"
+                    className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.3))] text-[var(--theme-accent,#91AFA9)] text-xs font-medium cursor-default transition-colors duration-1000"
                     title="Seamless Gapless Looping Active"
                   >
                     <Repeat className="w-3.5 h-3.5" />
@@ -188,11 +190,12 @@ export const ListeningRoom: React.FC = () => {
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => setTimerModalOpen(true)}
-                    className={`flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border text-xs font-medium transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
                       sleepTimer.isRunning
-                        ? 'bg-[#91AFA9]/20 border-[#91AFA9] text-[#91AFA9]'
-                        : 'bg-[#202B28] border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF]'
+                        ? 'bg-[var(--theme-accent,#91AFA9)]/20 border-[var(--theme-accent,#91AFA9)] text-[var(--theme-accent,#91AFA9)]'
+                        : 'bg-[var(--theme-surface,#202B28)] border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF]'
                     }`}
                     title="Sleep Timer"
                   >
@@ -206,10 +209,10 @@ export const ListeningRoom: React.FC = () => {
 
                   <a
                     href="#atmosphere-mixer"
-                    className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-[#202B28] border border-[#91AFA9]/20 text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-[#91AFA9]/40 text-xs font-medium transition-all"
+                    className="flex items-center gap-1.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-[var(--theme-border-active,rgba(145,175,169,0.4))] text-xs font-medium transition-all"
                   >
-                    <Sliders className="w-3.5 h-3.5 text-[#91AFA9]" />
-                    <span>Mix</span>
+                    <Sliders className="w-3.5 h-3.5 text-[var(--theme-accent,#91AFA9)]" />
+                    <span>Console</span>
                   </a>
                 </div>
               </div>

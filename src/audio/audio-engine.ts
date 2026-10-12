@@ -167,31 +167,10 @@ class StillwaveAudioEngine {
   }
 
   /**
-   * Starts or resumes a sound layer within the mix without stopping others.
+   * Starts or resumes a sound layer exclusively (enforcing single sound playback).
    */
   public async startLayer(soundId: string, audioSrc: string, volume = 0.7): Promise<void> {
-    await this.ensureContext();
-
-    const layer = this.getOrCreateLayer(soundId, audioSrc, volume);
-    layer.userVolume = volume;
-    layer.isMuted = false;
-
-    if (this.ctx && layer.gainNode && layer.gainNode.gain) {
-      const currTime = this.ctx.currentTime;
-      layer.gainNode.gain.cancelScheduledValues(currTime);
-      layer.gainNode.gain.setValueAtTime(0.001, currTime);
-      layer.gainNode.gain.exponentialRampToValueAtTime(Math.max(0.01, volume), currTime + 0.6);
-    } else {
-      layer.audio.volume = volume;
-    }
-
-    try {
-      await layer.audio.play();
-      layer.isPlaying = true;
-    } catch (err) {
-      console.warn('Failed to start layer', soundId, err);
-      throw err;
-    }
+    await this.playExclusive(soundId, audioSrc, volume);
   }
 
   /**

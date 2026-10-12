@@ -64,49 +64,60 @@ export const Navbar: React.FC = () => {
   }, [togglePlayPause, masterVolume, setMasterVolume]);
 
   const navLinks = [
-    { label: 'Sounds', href: '#soundscapes' },
-    { label: 'Lounge', href: '#listening-room' },
-    { label: 'Atmosphere Mixer', href: '#atmosphere-mixer' },
+    { label: 'Soundscapes', href: '#soundscapes' },
     { label: 'Intentions', href: '#intentions' },
-    { label: 'Silence', href: '#beauty-of-silence' },
-    { label: 'Ritual', href: '#ritual' },
-    { label: 'About', href: '#about' },
+    { label: 'Rituals', href: '#ritual' },
   ];
 
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
           isScrolled
-            ? 'glass-nav py-3.5 shadow-lg shadow-black/20'
+            ? 'glass-nav py-3 shadow-xl backdrop-blur-xl border-b border-[var(--theme-border-subtle,rgba(145,175,169,0.15))] bg-[var(--theme-bg,#101816)]/80'
             : 'bg-transparent py-5'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between">
-          {/* Logo */}
-          <a
-            href="#"
-            className="flex items-center gap-2 sm:gap-2.5 text-[#F1F3EF] hover:opacity-90 transition-opacity group"
-            aria-label="Stillwave Home"
-          >
-            <div className="relative flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.3))] transition-colors duration-1000">
-              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[var(--theme-accent,#91AFA9)] group-hover:scale-125 transition-all duration-700" />
-              {isPlaying && (
-                <span className="absolute inset-0 rounded-lg border border-[var(--theme-accent,#91AFA9)] animate-ping opacity-40" />
-              )}
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm sm:text-base font-medium tracking-[0.16em] sm:tracking-[0.2em] font-heading uppercase">
-                Stillwave
-              </span>
-              <span className="text-[8px] sm:text-[9px] tracking-widest text-[#B3BDB6] uppercase -mt-0.5 font-mono">
-                Sound Sanctuary
-              </span>
-            </div>
-          </a>
+          {/* Logo & Active Sound Motive Indicator */}
+          <div className="flex items-center gap-4">
+            <a
+              href="#"
+              className="flex items-center gap-2.5 text-[#F1F3EF] hover:opacity-90 transition-opacity group"
+              aria-label="Stillwave Home"
+            >
+              <div className="relative flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.3))] transition-colors duration-1000 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-[var(--theme-accent,#91AFA9)] group-hover:scale-125 transition-all duration-700" />
+                {isPlaying && (
+                  <span className="absolute inset-0 rounded-lg border border-[var(--theme-accent,#91AFA9)] animate-ping opacity-40" />
+                )}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm sm:text-base font-medium tracking-[0.2em] font-heading uppercase">
+                  Stillwave
+                </span>
+                <span className="text-[8px] sm:text-[9px] tracking-widest text-[#B3BDB6] uppercase -mt-0.5 font-mono">
+                  Sound Sanctuary
+                </span>
+              </div>
+            </a>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-xs tracking-wider text-[#B3BDB6]">
+            {/* Active Sound Motive Badge */}
+            {currentSound && (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--theme-surface,#202B28)]/90 border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] transition-all duration-1000">
+                <span
+                  className="w-1.5 h-1.5 rounded-full animate-pulse"
+                  style={{ backgroundColor: 'var(--theme-accent, #91AFA9)' }}
+                />
+                <span className="text-[11px] font-mono text-[var(--theme-accent,#91AFA9)]">
+                  {currentSound.title}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Navigation Links — Clean 3 Core Links */}
+          <nav className="hidden lg:flex items-center gap-8 text-xs font-medium tracking-wider text-[#B3BDB6]">
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -114,7 +125,7 @@ export const Navbar: React.FC = () => {
                 className="hover:text-[#F1F3EF] transition-colors py-1 relative group"
               >
                 {link.label}
-                <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[var(--theme-accent,#91AFA9)] transition-all group-hover:w-full" />
+                <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[var(--theme-accent,#91AFA9)] transition-all duration-300 group-hover:w-full" />
               </a>
             ))}
           </nav>

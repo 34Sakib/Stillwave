@@ -44,47 +44,51 @@ export const usePlayerStore = create<PlayerStoreState>()(
       currentSound: null,
       playbackStatus: 'idle',
       masterVolume: 0.8,
-      activeLayers: {
-        rain: { volume: 0.75, isMuted: false, isPlaying: false },
-        ocean: { volume: 0.70, isMuted: false, isPlaying: false },
-        forest: { volume: 0.65, isMuted: false, isPlaying: false },
-        fireplace: { volume: 0.60, isMuted: false, isPlaying: false },
-        wind: { volume: 0.55, isMuted: false, isPlaying: false },
-        night: { volume: 0.60, isMuted: false, isPlaying: false },
-      },
+      activeLayers: SOUND_TRACKS.reduce((acc, s) => {
+        acc[s.id] = { volume: s.defaultVolume, isMuted: false, isPlaying: false };
+        return acc;
+      }, {} as Record<string, { volume: number; isMuted: boolean; isPlaying: boolean }>),
       isLooping: true,
       sleepTimer: {
         durationMinutes: 0,
         remainingSeconds: 0,
         isRunning: false,
       },
-      favorites: ['rain', 'forest'],
+      favorites: ['rain', 'forest', 'zen-bowls'],
       customMixes: [],
       activePresetId: null,
       isMiniPlayerOpen: true,
 
       playSingleSound: async (sound: SoundTrack) => {
-        set({ playbackStatus: 'switching', currentSound: sound, activePresetId: null, isMiniPlayerOpen: true });
+        const currentLayers: Record<string, { volume: number; isMuted: boolean; isPlaying: boolean }> = { ...get().activeLayers };
+        SOUND_TRACKS.forEach((s) => {
+          if (!currentLayers[s.id]) {
+            currentLayers[s.id] = { volume: s.defaultVolume, isMuted: false, isPlaying: false };
+          }
+          currentLayers[s.id] = {
+            ...currentLayers[s.id],
+            isPlaying: s.id === sound.id,
+          };
+        });
+
+        set({
+          playbackStatus: 'switching',
+          currentSound: sound,
+          activePresetId: null,
+          isMiniPlayerOpen: true,
+          activeLayers: currentLayers,
+        });
+
         try {
-          const currentLayers = { ...get().activeLayers };
-          // Mark target layer as playing, others stopped
-          Object.keys(currentLayers).forEach((key) => {
-            currentLayers[key] = {
-              ...currentLayers[key],
-              isPlaying: key === sound.id,
-            };
-          });
-
           await audioEngine.playExclusive(sound.id, sound.audioSrc, sound.defaultVolume);
-
           set({
             currentSound: sound,
             playbackStatus: 'playing',
             activeLayers: currentLayers,
           });
         } catch (error) {
-          console.error('Play single sound failure:', error);
-          set({ playbackStatus: 'error' });
+          console.warn('Playback error caught, cleanly falling back to paused:', error);
+          set({ playbackStatus: 'paused' });
         }
       },
 
@@ -93,13 +97,15 @@ export const usePlayerStore = create<PlayerStoreState>()(
 
         if (playbackStatus === 'playing') {
           audioEngine.pauseAll();
-          set({ playbackStatus: 'paused' });
+          const currentLayers = { ...get().activeLayers };
+          Object.keys(currentLayers).forEach((key) => {
+            currentLayers[key] = { ...currentLayers[key], isPlaying: false };
+          });
+          set({ playbackStatus: 'paused', activeLayers: currentLayers });
         } else if (playbackStatus === 'paused') {
-          set({ playbackStatus: 'loading' });
-          await audioEngine.resumeAll();
-          set({ playbackStatus: 'playing' });
+          const soundToPlay = currentSound || SOUND_TRACKS[0];
+          await get().playSingleSound(soundToPlay);
         } else {
-          // If idle or stopped, play current sound or default to rain
           const soundToPlay = currentSound || SOUND_TRACKS[0];
           await get().playSingleSound(soundToPlay);
         }
@@ -144,77 +150,32 @@ export const usePlayerStore = create<PlayerStoreState>()(
         const sound = getSoundById(soundId);
         if (!sound) return;
 
-        const activeLayers = { ...get().activeLayers };
-        const layerState = activeLayers[soundId] || { volume: sound.defaultVolume, isMuted: false, isPlaying: false };
+        const { activeLayers, playbackStatus } = get();
+        const isThisPlaying = activeLayers[soundId]?.isPlaying && playbackStatus === 'playing';
 
-        if (layerState.isPlaying) {
+        if (isThisPlaying) {
           audioEngine.pauseLayer(soundId);
-          activeLayers[soundId] = { ...layerState, isPlaying: false };
-          set({ activeLayers });
-
-          // If no layers remain playing, pause status
-          const anyPlaying = Object.values(activeLayers).some((l) => l.isPlaying);
-          if (!anyPlaying) set({ playbackStatus: 'paused' });
+          const currentLayers = { ...activeLayers };
+          Object.keys(currentLayers).forEach((key) => {
+            currentLayers[key] = { ...currentLayers[key], isPlaying: false };
+          });
+          set({ activeLayers: currentLayers, playbackStatus: 'paused' });
         } else {
-          try {
-            await audioEngine.startLayer(soundId, sound.audioSrc, layerState.volume);
-            activeLayers[soundId] = { ...layerState, isPlaying: true };
-            set({
-              activeLayers,
-              playbackStatus: 'playing',
-              currentSound: sound,
-              isMiniPlayerOpen: true,
-            });
-          } catch (err) {
-            console.error('Failed to toggle layer', soundId, err);
-          }
+          // Play target sound exclusively! Stop all other tracks!
+          await get().playSingleSound(sound);
         }
       },
 
       loadPreset: async (preset: AtmospherePreset) => {
-        set({ playbackStatus: 'loading', activePresetId: preset.id, isMiniPlayerOpen: true });
-        const currentLayers = { ...get().activeLayers };
+        const primarySoundId = preset.layers[0]?.soundId || 'rain';
+        const sound = getSoundById(primarySoundId) || SOUND_TRACKS[0];
 
-        // Silence all unselected layers
-        Object.keys(currentLayers).forEach((key) => {
-          const presetLayer = preset.layers.find((l) => l.soundId === key);
-          if (presetLayer) {
-            currentLayers[key] = {
-              volume: presetLayer.volume,
-              isMuted: false,
-              isPlaying: true,
-            };
-          } else {
-            currentLayers[key] = {
-              ...currentLayers[key],
-              isPlaying: false,
-            };
-          }
-        });
-
-        // Stop all current playing audio
-        audioEngine.stopAll();
-
-        // Start each preset layer
-        for (const l of preset.layers) {
-          const snd = getSoundById(l.soundId);
-          if (snd) {
-            await audioEngine.startLayer(l.soundId, snd.audioSrc, l.volume);
-          }
-        }
-
-        const primarySound = getSoundById(preset.layers[0]?.soundId) || SOUND_TRACKS[0];
-
-        // Apply preset sleep timer if provided
         if (preset.sleepTimerMinutes) {
           get().setSleepTimer(preset.sleepTimerMinutes);
         }
 
-        set({
-          currentSound: primarySound,
-          activeLayers: currentLayers,
-          playbackStatus: 'playing',
-        });
+        set({ activePresetId: preset.id });
+        await get().playSingleSound(sound);
       },
 
       resetMix: () => {

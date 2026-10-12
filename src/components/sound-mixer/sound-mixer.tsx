@@ -49,13 +49,13 @@ export const SoundMixer: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div>
           <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] block mb-2 transition-colors duration-1000">
-            04 · Multi-Track Engine
+            04 · Soundscape Console
           </span>
           <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-[#F1F3EF] font-heading">
-            Build Your Atmosphere
+            Acoustic Studio & Faders
           </h2>
           <p className="text-sm text-[#B3BDB6] max-w-xl mt-2 leading-relaxed">
-            Layer multiple ambient frequencies at once. Fine-tune individual intensities, mute tracks, and save your personalized sanctuary recipes locally.
+            Solo preview and fine-tune individual natural acoustic frequencies. Adjust track volume, mute controls, and balance with tactile precision faders.
           </p>
         </div>
 

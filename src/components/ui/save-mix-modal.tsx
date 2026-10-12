@@ -32,9 +32,13 @@ export const SaveMixModal: React.FC<SaveMixModalProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md cursor-pointer"
+    >
       <div
-        className="w-full max-w-md bg-[#202B28] border border-[#91AFA9]/20 rounded-2xl p-6 shadow-2xl text-[#F1F3EF] relative"
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-[var(--theme-surface,#202B28)] border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] rounded-2xl p-6 shadow-2xl text-[#F1F3EF] relative cursor-default transition-colors duration-1000"
         role="dialog"
         aria-modal="true"
         aria-labelledby="save-mix-title"

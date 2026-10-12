@@ -15,6 +15,10 @@ import {
   Flame,
   Wind,
   Moon,
+  Sparkles,
+  Droplets,
+  Radio,
+  CloudLightning,
 } from 'lucide-react';
 import { SoundTrack } from '@/types';
 import { usePlayerStore } from '@/stores/player-store';
@@ -40,6 +44,14 @@ const getCategoryIcon = (category: string) => {
       return <Wind className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
     case 'night':
       return <Moon className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    case 'zen':
+      return <Sparkles className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    case 'stream':
+      return <Droplets className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    case 'noise':
+      return <Radio className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
+    case 'thunder':
+      return <CloudLightning className="w-3 h-3 text-[var(--theme-accent,#91AFA9)]" />;
     default:
       return null;
   }
@@ -191,20 +203,6 @@ export const SoundCard: React.FC<SoundCardProps> = ({
               </button>
             )}
 
-            {/* Add to Mixer Button */}
-            <button
-              onClick={handleMixLayerToggle}
-              className={`p-2 sm:p-2.5 rounded-xl text-xs font-medium border transition-all min-w-[34px] min-h-[34px] flex items-center justify-center ${
-                isLayerActive
-                  ? 'bg-[var(--theme-accent,#91AFA9)]/20 border-[var(--theme-accent,#91AFA9)] text-[var(--theme-accent,#91AFA9)]'
-                  : 'bg-[var(--theme-surface,#202B28)]/90 border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] text-[#B3BDB6] hover:text-[#F1F3EF]'
-              }`}
-              title={isLayerActive ? 'Active in atmosphere mix' : 'Add to atmosphere mix'}
-              aria-label={isLayerActive ? 'Remove from atmosphere mix' : 'Add to atmosphere mix'}
-            >
-              {isLayerActive ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-            </button>
-
             {/* Play / Pause Primary Button */}
             <button
               type="button"
@@ -212,18 +210,24 @@ export const SoundCard: React.FC<SoundCardProps> = ({
                 e.stopPropagation();
                 handleCardClick();
               }}
-              className={`p-2.5 sm:p-3 rounded-xl border transition-all min-w-[38px] min-h-[38px] flex items-center justify-center ${
+              className={`px-3.5 py-2 rounded-xl border transition-all flex items-center gap-2 cursor-pointer shadow-md active:scale-95 ${
                 isActive && isPlaying
-                  ? 'bg-[var(--theme-accent,#91AFA9)] text-[#101816] border-[var(--theme-accent,#91AFA9)] shadow-lg'
+                  ? 'bg-[var(--theme-accent,#91AFA9)] text-[#101816] border-[var(--theme-accent,#91AFA9)] font-medium shadow-lg'
                   : 'bg-[var(--theme-surface,#202B28)] text-[#F1F3EF] border-[var(--theme-border-subtle,rgba(145,175,169,0.3))] group-hover:bg-[var(--theme-accent,#91AFA9)] group-hover:text-[#101816] group-hover:border-[var(--theme-accent,#91AFA9)]'
               }`}
               title={isActive && isPlaying ? 'Pause sound' : 'Play sound'}
               aria-label={isActive && isPlaying ? `Pause ${sound.title}` : `Play ${sound.title}`}
             >
               {isActive && isPlaying ? (
-                <Pause className="w-4 h-4 fill-current" />
+                <>
+                  <Pause className="w-3.5 h-3.5 fill-current" />
+                  <span className="text-xs font-mono font-semibold">Playing</span>
+                </>
               ) : (
-                <Play className="w-4 h-4 fill-current ml-0.5" />
+                <>
+                  <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                  <span className="text-xs font-mono">Listen</span>
+                </>
               )}
             </button>
           </div>

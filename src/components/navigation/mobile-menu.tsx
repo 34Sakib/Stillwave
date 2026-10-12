@@ -68,49 +68,30 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
 
   if (!isOpen) return null;
 
-  const menuItems = [
+  const menuItems: Array<{
+    num: string;
+    label: string;
+    description: string;
+    href: string;
+    badge?: string;
+  }> = [
     {
       num: '01',
-      label: 'Sound Library',
-      description: 'Continuous loopable natural environments',
+      label: 'Soundscapes',
+      description: 'Continuous loopable natural acoustic environments',
       href: '#soundscapes',
     },
     {
       num: '02',
-      label: 'Listening Lounge',
-      description: 'Full acoustic room with live visualizer',
-      href: '#listening-room',
-    },
-    {
-      num: '03',
-      label: 'Atmosphere Mixer',
-      description: 'Custom multi-track spatial layer engine',
-      href: '#atmosphere-mixer',
-      badge: activeLayersCount > 0 ? `${activeLayersCount} Active` : undefined,
-    },
-    {
-      num: '04',
-      label: 'Curated Intentions',
-      description: 'Sleep, Deep Focus, Reading & Calm presets',
+      label: 'Intentions',
+      description: 'Curated cognitive session recipes for Focus, Sleep & Calm',
       href: '#intentions',
     },
     {
-      num: '05',
-      label: 'The Beauty of Silence',
-      description: 'Editorial philosophy on acoustic stillness',
-      href: '#beauty-of-silence',
-    },
-    {
-      num: '06',
-      label: 'Daily Rituals',
-      description: 'Circadian habits and sleep timers',
+      num: '03',
+      label: 'Rituals',
+      description: 'Circadian daily habits, timers & acoustic presets',
       href: '#ritual',
-    },
-    {
-      num: '07',
-      label: 'Sanctuary Directory',
-      description: 'Acoustic design & DSP specifications',
-      href: '#about',
     },
   ];
 

@@ -45,7 +45,7 @@ export const IntentionsSection: React.FC = () => {
           Choose Your Intention
         </h2>
         <p className="text-sm text-[#B3BDB6] mt-3 leading-relaxed">
-          Crafted acoustic recipes designed for specific cognitive states. One tap tunes the multi-track mixer to balanced atmospheric levels.
+          Crafted acoustic recipes designed for specific cognitive states. One tap immerses you in balanced, restful sanctuary frequencies.
         </p>
       </div>
 

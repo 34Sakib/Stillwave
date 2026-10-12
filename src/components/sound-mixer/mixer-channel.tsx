@@ -77,21 +77,21 @@ export const MixerChannel: React.FC<MixerChannelProps> = ({ sound }) => {
       <div className="mt-5 space-y-2">
         <div className="flex items-center justify-between text-xs text-[#B3BDB6]">
           <button
+            type="button"
             onClick={() => toggleLayerMute(sound.id)}
-            disabled={!isPlaying}
-            className={`flex items-center gap-1.5 transition-colors disabled:opacity-30 ${
+            className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
               isMuted ? 'text-rose-400' : 'hover:text-[#F1F3EF]'
             }`}
             title={isMuted ? 'Unmute' : 'Mute'}
           >
-            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-[#91AFA9]" />}
+            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-[var(--theme-accent,#91AFA9)]" />}
             <span className="font-mono text-[11px]">
               {isMuted ? 'Muted' : 'Volume'}
             </span>
           </button>
 
           <span className="font-mono text-[11px] text-[#D8D6C9]">
-            {isPlaying && !isMuted ? `${Math.round(volume * 100)}%` : '0%'}
+            {!isMuted ? `${Math.round(volume * 100)}%` : '0%'}
           </span>
         </div>
 
@@ -101,18 +101,17 @@ export const MixerChannel: React.FC<MixerChannelProps> = ({ sound }) => {
           max="1"
           step="0.01"
           value={volume}
-          disabled={!isPlaying}
           onChange={(e) => setLayerVolume(sound.id, parseFloat(e.target.value))}
-          className="w-full disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-full cursor-pointer"
           aria-label={`${sound.title} volume level`}
         />
       </div>
 
       {/* Dynamic Sound Active Indicator bar */}
-      <div className="mt-3 h-1 w-full rounded-full bg-[#101816] overflow-hidden">
+      <div className="mt-3 h-1 w-full rounded-full bg-[var(--theme-bg,#101816)] overflow-hidden transition-colors duration-1000">
         <div
           className={`h-full transition-all duration-300 ${
-            isPlaying && !isMuted ? 'bg-[#91AFA9]' : 'bg-transparent'
+            isPlaying && !isMuted ? 'bg-[var(--theme-accent,#91AFA9)]' : 'bg-transparent'
           }`}
           style={{ width: isPlaying && !isMuted ? `${volume * 100}%` : '0%' }}
         />

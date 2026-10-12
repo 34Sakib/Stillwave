@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { motion } from 'motion/react';
 import { Play, Pause, Compass, Sparkles, Volume2 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/player-store';
 import { SOUND_TRACKS } from '@/data/sounds';
@@ -30,42 +31,63 @@ export const HeroSection: React.FC = () => {
           alt="Nordic pine forest shrouded in gentle morning fog"
           fill
           priority
-          className="object-cover object-center scale-105 animate-float-gentle opacity-80"
+          className="object-cover object-center scale-105 animate-float-gentle opacity-75"
         />
-        {/* Cinematic Vignette Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#101816]/70 via-[#101816]/50 to-[#101816]" />
-        <div className="absolute inset-0 bg-[#101816]/40 backdrop-blur-[2px]" />
+        {/* Dynamic Vignette Overlays matching sound motive */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--theme-bg,#101816)]/75 via-[var(--theme-bg,#101816)]/55 to-[var(--theme-bg,#101816)] transition-all duration-1000" />
+        <div className="absolute inset-0 bg-[var(--theme-bg,#101816)]/40 backdrop-blur-[2px] transition-all duration-1000" />
       </div>
 
       {/* Floating Organic Aura Accent */}
       <div
-        className="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-[130px] pointer-events-none animate-soft-pulse transition-all duration-1000"
+        className="absolute -top-24 left-1/2 -translate-x-1/2 w-[650px] h-[650px] rounded-full blur-[140px] pointer-events-none animate-soft-pulse transition-all duration-1000"
         style={{ background: 'var(--theme-glow, rgba(145, 175, 169, 0.16))' }}
       />
 
-      {/* Hero Content */}
+      {/* Hero Content with Motion reveal */}
       <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
         {/* Subtle pill tag */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--theme-surface,#202B28)]/80 border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] backdrop-blur-md text-xs font-mono tracking-widest text-[#D8D6C9] uppercase shadow-lg transition-colors duration-1000">
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--theme-surface,#202B28)]/90 border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] backdrop-blur-md text-xs font-mono tracking-widest text-[#D8D6C9] uppercase shadow-lg transition-colors duration-1000"
+        >
           <Sparkles className="w-3.5 h-3.5 text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
           <span>Continuous Ambient Sound Sanctuary</span>
-        </div>
+        </motion.div>
 
         {/* Headline */}
-        <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-[#F1F3EF] font-heading leading-[1.08] px-2">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.1, ease: 'easeOut' }}
+          className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-[#F1F3EF] font-heading leading-[1.08] px-2"
+        >
           Find Your <span className="italic font-serif text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000">Quiet</span>.
-        </h1>
+        </motion.h1>
 
         {/* Subheading */}
-        <p className="text-sm sm:text-lg md:text-xl text-[#B3BDB6] max-w-2xl mx-auto font-light leading-relaxed px-4">
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.2, ease: 'easeOut' }}
+          className="text-sm sm:text-lg md:text-xl text-[#B3BDB6] max-w-2xl mx-auto font-light leading-relaxed px-4"
+        >
           Real, uninterrupted nature acoustic soundscapes designed for deep focus, restorative rest, and intentional stillness.
-        </p>
+        </motion.p>
 
         {/* Hero CTA Actions */}
-        <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.3, ease: 'easeOut' }}
+          className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto"
+        >
           <button
+            type="button"
             onClick={handleStartListening}
-            className="w-full sm:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-2xl bg-[var(--theme-accent,#91AFA9)] hover:bg-[var(--theme-accent-hover,#B4CCC7)] text-[#101816] font-medium text-sm tracking-wide transition-all shadow-xl flex items-center justify-center gap-3 group active:scale-95"
+            className="w-full sm:w-auto px-7 py-3.5 sm:px-8 sm:py-4 rounded-2xl bg-[var(--theme-accent,#91AFA9)] hover:bg-[var(--theme-accent-hover,#B4CCC7)] text-[#101816] font-medium text-sm tracking-wide transition-all shadow-xl flex items-center justify-center gap-3 group active:scale-95 cursor-pointer"
             style={{
               boxShadow: '0 10px 25px -5px rgba(var(--theme-accent-rgb, 145, 175, 169), 0.25)',
             }}
@@ -91,14 +113,18 @@ export const HeroSection: React.FC = () => {
             <Compass className="w-4 h-4 text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000" />
             <span>Explore Sounds</span>
           </a>
-        </div>
+        </motion.div>
 
         {/* Sound Status Micro-Badge */}
         {isPlaying && currentSound && (
-          <div className="pt-4 sm:pt-6 animate-fade-in inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[var(--theme-bg,#101816)]/80 border border-[var(--theme-border-active,rgba(145,175,169,0.3))] backdrop-blur-md text-[11px] sm:text-xs text-[#D8D6C9] transition-colors duration-1000">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="pt-4 sm:pt-6 inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[var(--theme-surface,#202B28)]/90 border border-[var(--theme-border-active,rgba(145,175,169,0.3))] backdrop-blur-md text-[11px] sm:text-xs text-[#D8D6C9] transition-colors duration-1000 shadow-md"
+          >
             <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--theme-accent,#91AFA9)] animate-pulse transition-colors duration-1000" />
             <span>Listening to <strong className="text-[#F1F3EF] font-medium">{currentSound.title}</strong></span>
-          </div>
+          </motion.div>
         )}
       </div>
 

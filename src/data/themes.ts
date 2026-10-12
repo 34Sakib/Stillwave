@@ -1,7 +1,7 @@
 export interface SoundscapeTheme {
   id: string;
   name: string;
-  iconName: 'CloudRain' | 'Waves' | 'Trees' | 'Flame' | 'Wind' | 'Moon' | 'Sparkles';
+  iconName: 'CloudRain' | 'Waves' | 'Trees' | 'Flame' | 'Wind' | 'Moon' | 'Sparkles' | 'Bell' | 'Droplets' | 'Radio' | 'CloudLightning';
   bgBase: string;
   bgSurface: string;
   bgElevated: string;
@@ -135,6 +135,74 @@ export const SOUNDSCAPE_THEMES: Record<string, SoundscapeTheme> = {
     borderSubtle: 'rgba(143, 165, 214, 0.16)',
     borderActive: 'rgba(143, 165, 214, 0.50)',
     textAccent: '#B2C4EB',
+  },
+  'zen-bowls': {
+    id: 'zen-bowls',
+    name: 'Zen Sanctuary Temple',
+    iconName: 'Bell',
+    bgBase: '#12100B',
+    bgSurface: '#1D1A12',
+    bgElevated: '#282319',
+    bgHover: '#332D20',
+    accent: '#D4AF37',
+    accentHover: '#EAC968',
+    accentRgb: '212, 175, 55',
+    glow: 'rgba(212, 175, 55, 0.20)',
+    glowSecondary: 'rgba(40, 35, 25, 0.45)',
+    borderSubtle: 'rgba(212, 175, 55, 0.16)',
+    borderActive: 'rgba(212, 175, 55, 0.50)',
+    textAccent: '#EAC968',
+  },
+  stream: {
+    id: 'stream',
+    name: 'Glacial Alpine Stream',
+    iconName: 'Droplets',
+    bgBase: '#081316',
+    bgSurface: '#0E1F24',
+    bgElevated: '#152C33',
+    bgHover: '#1D3B45',
+    accent: '#44BED3',
+    accentHover: '#72D5E6',
+    accentRgb: '68, 190, 211',
+    glow: 'rgba(68, 190, 211, 0.20)',
+    glowSecondary: 'rgba(21, 44, 51, 0.45)',
+    borderSubtle: 'rgba(68, 190, 211, 0.16)',
+    borderActive: 'rgba(68, 190, 211, 0.50)',
+    textAccent: '#72D5E6',
+  },
+  'brown-noise': {
+    id: 'brown-noise',
+    name: 'Velvet Earth Cocoon',
+    iconName: 'Radio',
+    bgBase: '#13100E',
+    bgSurface: '#1F1A17',
+    bgElevated: '#2A2420',
+    bgHover: '#362E29',
+    accent: '#C7A88C',
+    accentHover: '#E0C5AD',
+    accentRgb: '199, 168, 140',
+    glow: 'rgba(199, 168, 140, 0.20)',
+    glowSecondary: 'rgba(42, 36, 32, 0.45)',
+    borderSubtle: 'rgba(199, 168, 140, 0.16)',
+    borderActive: 'rgba(199, 168, 140, 0.50)',
+    textAccent: '#E0C5AD',
+  },
+  thunder: {
+    id: 'thunder',
+    name: 'Distant Rolling Thunder',
+    iconName: 'CloudLightning',
+    bgBase: '#0C0E17',
+    bgSurface: '#141826',
+    bgElevated: '#1D2236',
+    bgHover: '#262D47',
+    accent: '#798DC7',
+    accentHover: '#A1B2E3',
+    accentRgb: '121, 141, 199',
+    glow: 'rgba(121, 141, 199, 0.22)',
+    glowSecondary: 'rgba(29, 34, 54, 0.45)',
+    borderSubtle: 'rgba(121, 141, 199, 0.18)',
+    borderActive: 'rgba(121, 141, 199, 0.52)',
+    textAccent: '#A1B2E3',
   },
 };
 
