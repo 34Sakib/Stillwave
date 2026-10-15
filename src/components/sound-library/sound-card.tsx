@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Play,
   Pause,
@@ -20,10 +21,12 @@ import {
   Radio,
   CloudLightning,
   Share2,
+  ExternalLink,
 } from 'lucide-react';
 import { SoundTrack } from '@/types';
 import { usePlayerStore } from '@/stores/player-store';
 import { useRainStore } from '@/stores/rain-store';
+import { SoundArtwork } from '@/components/ui/sound-artwork';
 
 interface SoundCardProps {
   sound: SoundTrack;
@@ -131,10 +134,20 @@ export const SoundCard: React.FC<SoundCardProps> = ({
       <div className="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-4 z-10 flex items-center justify-between pointer-events-none">
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] uppercase font-mono tracking-wider bg-[#101816]/85 backdrop-blur-md border border-[var(--theme-border-subtle,rgba(145,175,169,0.25))] text-[#D8D6C9] pointer-events-auto transition-colors duration-500">
           {getCategoryIcon(sound.category)}
-          <span>{sound.category}</span>
+          <span>{sound.tag || sound.category}</span>
         </span>
 
         <div className="flex items-center gap-1.5 pointer-events-auto">
+          <Link
+            href={`/sound/${sound.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="p-2 sm:p-2.5 rounded-full backdrop-blur-md border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] bg-[#101816]/75 text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-white/30 transition-all flex items-center justify-center min-w-[34px] min-h-[34px]"
+            title={`Open ${sound.title} page`}
+            aria-label={`Open ${sound.title} page`}
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </Link>
+
           <button
             type="button"
             onClick={(e) => {

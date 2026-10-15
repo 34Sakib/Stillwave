@@ -89,9 +89,9 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
     },
     {
       num: '03',
-      label: 'Rituals',
+      label: 'Daily Habits',
       description: 'Circadian daily habits, timers & acoustic presets',
-      href: '#ritual',
+      href: '#rituals',
     },
   ];
 

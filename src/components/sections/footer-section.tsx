@@ -19,9 +19,10 @@ export const FooterSection: React.FC = () => {
     <footer id="about" className="relative mt-20 border-t border-[var(--theme-border-subtle,rgba(145,175,169,0.15))] bg-[var(--theme-bg,#101816)] text-[#F1F3EF] transition-colors duration-1000">
       {/* Closing CTA Banner */}
       <div className="py-14 sm:py-20 px-4 sm:px-8 max-w-5xl mx-auto text-center space-y-5 sm:space-y-6">
-        <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000">
-          08 · Quiet Conclusion
-        </span>
+        <div className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] inline-flex items-center gap-3 transition-colors duration-1000">
+          <span className="w-6 h-[1px] bg-current opacity-70" />
+          <span>06 · Quiet Conclusion</span>
+        </div>
         <h2 className="text-2xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#F1F3EF] font-heading px-2">
           Take a moment for yourself.
         </h2>

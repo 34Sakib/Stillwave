@@ -1,40 +1,36 @@
 import type { Metadata, Viewport } from 'next';
-import { Manrope, Inter } from 'next/font/google';
-import { AmbientThemeProvider } from '@/components/theme/ambient-theme-provider';
+import Script from 'next/script';
 import './globals.css';
 
-const manrope = Manrope({
-  subsets: ['latin'],
-  variable: '--font-heading',
-  display: 'swap',
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-});
-
 export const metadata: Metadata = {
-  title: 'Stillwave - Premium Ambient Soundscape Sanctuary',
-  description: 'A calm, cinematic nature-inspired ambient sound sanctuary for focus, rest, and sleep. Continuous playback, custom multi-track mixing, and restrained atmospheric motion.',
-  keywords: ['ambient sounds', 'focus music', 'rain sounds', 'sleep sounds', 'white noise', 'soundscapes', 'relaxation'],
-  authors: [{ name: 'Stillwave Sanctuary' }],
+  title: 'STILLWAVE — A Sanctuary for Wandering Minds',
+  description: 'Forty synthesized soundscapes, one at a time. Step away from the noise of the day and let the room change color around you. Calm sound for focus, sleep and quiet.',
+  keywords: [
+    'ambient sounds',
+    'focus music',
+    'rain sounds',
+    'sleep sounds',
+    'white noise',
+    'soundscapes',
+    'relaxation',
+    'meditation',
+    'stillwave',
+  ],
   icons: {
     icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icon.svg?v=stillwave-2', type: 'image/svg+xml' },
+      { url: '/favicon.ico?v=stillwave-2', sizes: '32x32' },
     ],
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    shortcut: '/icon.svg?v=stillwave-2',
+    apple: '/icon.svg?v=stillwave-2',
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#101816',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: '#0A2B2A',
 };
 
 export default function RootLayout({
@@ -43,22 +39,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${manrope.variable} ${inter.variable} scroll-smooth dark`}
-    >
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-        <link rel="alternate icon" href="/favicon.ico" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;1,6..72,300;1,6..72,400&family=Geist:wght@400;500&family=JetBrains+Mono:wght@400&display=swap"
+          rel="stylesheet"
+        />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg?v=stillwave-2" />
+        <link rel="alternate icon" href="/favicon.ico?v=stillwave-2" />
+        <Script
+          src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="/js/stillwave-engine.js"
+          strategy="afterInteractive"
+        />
       </head>
-      <body
-        suppressHydrationWarning
-        className="min-h-screen text-[#F1F3EF] flex flex-col antialiased transition-colors duration-1000"
-      >
-        <AmbientThemeProvider>
-          {children}
-        </AmbientThemeProvider>
+      <body suppressHydrationWarning>
+        {children}
       </body>
     </html>
   );

@@ -38,14 +38,15 @@ export const IntentionsSection: React.FC = () => {
     <section id="intentions" className="py-24 px-5 sm:px-8 max-w-7xl mx-auto">
       {/* Section Header */}
       <div className="mb-14 text-center max-w-2xl mx-auto">
-        <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] block mb-2 transition-colors duration-1000">
-          05 · Purpose-Driven Sessions
-        </span>
-        <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-[#F1F3EF] font-heading">
-          Choose Your Intention
+        <div className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] inline-flex items-center gap-3 mb-3 transition-colors duration-1000">
+          <span className="w-6 h-[1px] bg-current opacity-70" />
+          <span>03 / Intentions</span>
+        </div>
+        <h2 className="text-3xl sm:text-5xl font-light tracking-tight text-[#F1F3EF] font-heading">
+          Start with <em className="italic text-[#B3BDB6]">what you need.</em>
         </h2>
         <p className="text-sm text-[#B3BDB6] mt-3 leading-relaxed">
-          Crafted acoustic recipes designed for specific cognitive states. One tap immerses you in balanced, restful sanctuary frequencies.
+          Crafted acoustic recipes designed for specific cognitive states. Each intention opens with its lead sound and lines up a companion in the side panel.
         </p>
       </div>
 

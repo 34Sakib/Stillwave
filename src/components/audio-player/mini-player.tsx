@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { usePlayerStore } from '@/stores/player-store';
 import { SOUND_TRACKS } from '@/data/sounds';
+import { SoundArtwork } from '@/components/ui/sound-artwork';
 
 export const MiniPlayer: React.FC = () => {
   const {
@@ -35,6 +36,8 @@ export const MiniPlayer: React.FC = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const hasStaticImage = Boolean(sound?.artwork);
+
   return (
     <div
       className="fixed left-1/2 -translate-x-1/2 bottom-4 sm:bottom-6 z-40 w-[calc(100%-24px)] max-w-4xl"
@@ -50,12 +53,20 @@ export const MiniPlayer: React.FC = () => {
           aria-label="Open now playing drawer"
         >
           <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-[var(--theme-border-subtle,rgba(145,175,169,0.2))] shadow-sm bg-black/30">
-            <img
-              src={sound.artwork}
-              alt={sound.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
+            {hasStaticImage ? (
+              <img
+                src={sound.artwork}
+                alt={sound.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <SoundArtwork
+                sound={sound}
+                isSpinning={isPlaying}
+                className="w-full h-full"
+              />
+            )}
           </div>
 
           <div className="min-w-0 pr-1">

@@ -62,9 +62,10 @@ export const Navbar: React.FC = () => {
   }, [togglePlayPause, masterVolume, setMasterVolume]);
 
   const navLinks = [
-    { label: 'Soundscapes', href: '#soundscapes' },
+    { label: 'Library', href: '/library' },
+    { label: 'Collections', href: '#collections' },
     { label: 'Intentions', href: '#intentions' },
-    { label: 'Rituals', href: '#ritual' },
+    { label: 'Daily Habits', href: '#rituals' },
   ];
 
   const themeOptions: { id: ThemeMode; label: string; desc: string; color: string }[] = [

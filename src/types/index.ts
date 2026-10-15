@@ -1,4 +1,25 @@
-export type SoundCategory = 'rain' | 'ocean' | 'forest' | 'fireplace' | 'wind' | 'night' | 'zen' | 'stream' | 'noise' | 'thunder';
+export type SoundCategory =
+  | 'rain'
+  | 'ocean'
+  | 'forest'
+  | 'fireplace'
+  | 'wind'
+  | 'night'
+  | 'zen'
+  | 'stream'
+  | 'noise'
+  | 'thunder'
+  | 'snow'
+  | 'lake'
+  | 'cocoon'
+  | 'chimes'
+  | 'musicbox'
+  | 'drizzle'
+  | 'cloud'
+  | 'haze'
+  | 'om'
+  | 'tide'
+  | string;
 
 export type PlaybackStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'stopped' | 'switching' | 'error';
 
@@ -17,6 +38,10 @@ export interface SoundTrack {
   defaultVolume: number;
   frequencyLabel?: string;
   recommendations?: string[];
+  tag?: string; // Focus, Meditation, Deep Sleep, Calm, Unwind
+  bgColor?: string;
+  surfaceColor?: string;
+  accentColor?: string;
 }
 
 export interface ActiveLayer {

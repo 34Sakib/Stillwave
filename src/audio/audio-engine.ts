@@ -1,4 +1,5 @@
 import { rainAudioEngine } from './rain-engine';
+import { proceduralSynthesizer } from './procedural-synthesizer';
 
 interface SoundLayerInstance {
   soundId: string;
@@ -35,6 +36,7 @@ class StillwaveAudioEngine {
   }
 
   public isPlayingAny(): boolean {
+    if (proceduralSynthesizer.getActiveSoundId() !== null) return true;
     for (const layer of this.layers.values()) {
       if (layer.isPlaying) return true;
     }
@@ -251,7 +253,19 @@ class StillwaveAudioEngine {
 
     rainAudioEngine.pause();
 
-    // Play target sound
+    // If procedural soundscape (e.g. empty audioSrc or procedural synthetic patch)
+    if (!audioSrc || audioSrc.trim() === '' || proceduralSynthesizer.hasSynthesisFor(soundId)) {
+      if (!audioSrc || audioSrc.trim() === '') {
+        proceduralSynthesizer.startSound(soundId, this.ctx!, this.masterGain!, targetVolume);
+        this.activeSoundId = soundId;
+        if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'playing';
+        }
+        return;
+      }
+    }
+
+    // Play target sound via Audio element, falling back cleanly to procedural if needed
     const targetLayer = this.getOrCreateLayer(soundId, audioSrc, targetVolume);
     targetLayer.userVolume = targetVolume;
     targetLayer.isMuted = false;
@@ -267,14 +281,23 @@ class StillwaveAudioEngine {
 
     try {
       await targetLayer.audio.play();
+      proceduralSynthesizer.stopSound(0.5);
       targetLayer.isPlaying = true;
       this.activeSoundId = soundId;
       if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'playing';
       }
     } catch (error) {
-      console.warn('Play error for', soundId, error);
-      throw error;
+      console.warn('Play audio file fallback to procedural synthesis for:', soundId, error);
+      if (proceduralSynthesizer.hasSynthesisFor(soundId)) {
+        proceduralSynthesizer.startSound(soundId, this.ctx!, this.masterGain!, targetVolume);
+        this.activeSoundId = soundId;
+        if (typeof window !== 'undefined' && 'mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'playing';
+        }
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -292,6 +315,9 @@ class StillwaveAudioEngine {
     if (soundId === 'rain') {
       rainAudioEngine.pause();
     }
+    if (proceduralSynthesizer.getActiveSoundId() === soundId) {
+      proceduralSynthesizer.stopSound(0.5);
+    }
     const layer = this.layers.get(soundId);
     if (layer && layer.isPlaying) {
       layer.audio.pause();
@@ -308,6 +334,9 @@ class StillwaveAudioEngine {
   public stopLayer(soundId: string): void {
     if (soundId === 'rain') {
       rainAudioEngine.stop();
+    }
+    if (proceduralSynthesizer.getActiveSoundId() === soundId) {
+      proceduralSynthesizer.stopSound(0.2);
     }
     const layer = this.layers.get(soundId);
     if (layer) {
@@ -328,6 +357,7 @@ class StillwaveAudioEngine {
    */
   public pauseAll(): void {
     rainAudioEngine.pause();
+    proceduralSynthesizer.stopSound(0.5);
     for (const layer of this.layers.values()) {
       if (layer.isPlaying) {
         layer.audio.pause();
@@ -366,6 +396,7 @@ class StillwaveAudioEngine {
    */
   public stopAll(): void {
     rainAudioEngine.stop();
+    proceduralSynthesizer.stopSound(0.2);
     for (const layer of this.layers.values()) {
       layer.audio.pause();
       layer.audio.currentTime = 0;
@@ -383,6 +414,9 @@ class StillwaveAudioEngine {
   public setLayerVolume(soundId: string, volume: number): void {
     if (soundId === 'rain') {
       rainAudioEngine.setVolume(volume);
+    }
+    if (proceduralSynthesizer.getActiveSoundId() === soundId) {
+      proceduralSynthesizer.setVolume(volume);
     }
     const layer = this.layers.get(soundId);
     if (!layer) return;

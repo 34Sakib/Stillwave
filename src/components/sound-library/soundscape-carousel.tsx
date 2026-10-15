@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
 import { SOUND_TRACKS } from '@/data/sounds';
 import { SoundCard } from './sound-card';
@@ -78,26 +79,26 @@ export const SoundscapeCarousel: React.FC = () => {
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 md:mb-12 gap-5 sm:gap-6">
         <div>
-          <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] block mb-2 transition-colors duration-1000">
-            02 · Soundscapes
-          </span>
+          <div className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] flex items-center gap-3 mb-2 transition-colors duration-1000">
+            <span className="w-6 h-[1px] bg-current opacity-70" />
+            <span>01 / Featured</span>
+          </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-tight text-[#F1F3EF] font-heading">
-            Choose Your Atmosphere
+            Twenty rooms, <em>one at a time.</em>
           </h2>
           <p className="text-xs sm:text-sm text-[#B3BDB6] max-w-xl mt-2 leading-relaxed">
-            Real, continuous natural acoustic soundscapes. Swipe or scroll horizontally to explore environments and listen in pure uninterrupted stillness.
+            Real, continuous natural acoustic soundscapes. Choosing a new sound crossfades the old one out and shifts the room into its atmosphere.
           </p>
         </div>
 
-        {/* Carousel Arrow Controls & Console Shortcut */}
-        <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
-          <a
-            href="#atmosphere-mixer"
-            className="inline-flex items-center gap-1.5 text-xs text-[var(--theme-accent,#91AFA9)] hover:text-[#F1F3EF] transition-colors"
+        {/* Carousel Arrow Controls & Library Link */}
+        <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto">
+          <Link
+            href="/library"
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-[var(--theme-accent,#91AFA9)] hover:text-[#F1F3EF] transition-colors"
           >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>Open Acoustic Console</span>
-          </a>
+            <span>Browse all 20 &rarr;</span>
+          </Link>
 
           <div className="flex items-center gap-2">
             <button

@@ -1,28 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#283633"/>
-      <stop offset="100%" stop-color="#101816"/>
-    </linearGradient>
-    <linearGradient id="waveGrad" x1="0%" y1="50%" x2="100%" y2="50%">
-      <stop offset="0%" stop-color="#72918B"/>
-      <stop offset="50%" stop-color="#B4CCC7"/>
-      <stop offset="100%" stop-color="#D8D6C9"/>
-    </linearGradient>
-    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="0.8" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
+    <style>
+      .fav-wave {
+        animation: favWave 2.4s linear infinite;
+      }
+      @keyframes favWave {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-16px); }
+      }
+    </style>
+    <clipPath id="tile">
+      <rect x="1" y="1" width="30" height="30" rx="7" />
+    </clipPath>
   </defs>
-
-  <!-- Premium Obsidian Tile with Sage Edge -->
-  <rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="url(#bgGrad)" stroke="#91AFA9" stroke-opacity="0.4" stroke-width="1.2"/>
-
-  <!-- Harmonic Stillwave Curves -->
-  <path d="M6 16.5 C8.5 11.5, 11 11.5, 13.5 16.5 C16 21.5, 18.5 21.5, 21 16.5 C22.5 13.5, 24.5 13.5, 26 16.5" 
-        stroke="url(#waveGrad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#softGlow)"/>
-
-  <!-- Tranquil Sanctuary Focal Point -->
-  <circle cx="16" cy="16.5" r="2.2" fill="#F1F3EF"/>
-  <circle cx="16" cy="16.5" r="4.2" stroke="#91AFA9" stroke-opacity="0.6" stroke-width="0.9"/>
+  <rect x="1" y="1" width="30" height="30" rx="7" fill="#0A2B2A" stroke="#B4EBCB" stroke-opacity="0.3" stroke-width="1.2"/>
+  <g clip-path="url(#tile)">
+    <path class="fav-wave"
+          d="M -16 16 Q -12 9, -8 16 T 0 16 Q 4 9, 8 16 T 16 16 Q 20 9, 24 16 T 32 16 Q 36 9, 40 16 T 48 16"
+          stroke="#B4EBCB"
+          stroke-width="2.4"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+  </g>
 </svg>

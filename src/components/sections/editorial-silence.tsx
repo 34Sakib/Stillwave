@@ -18,9 +18,10 @@ export const EditorialSilence: React.FC = () => {
 
         {/* Section Tag */}
         <div>
-          <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] transition-colors duration-1000">
-            06 · Mindful Stillness
-          </span>
+          <div className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] inline-flex items-center gap-3 transition-colors duration-1000">
+            <span className="w-6 h-[1px] bg-current opacity-70" />
+            <span>05 / Mindful Stillness</span>
+          </div>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#F1F3EF] mt-3 font-heading leading-tight px-2">
             The Architecture of Silence
           </h2>

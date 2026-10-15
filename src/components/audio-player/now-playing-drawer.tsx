@@ -19,6 +19,7 @@ import { usePlayerStore } from '@/stores/player-store';
 import { audioEngine } from '@/audio/audio-engine';
 import { SOUND_TRACKS, getSoundById } from '@/data/sounds';
 import { ThemeMode } from '@/types';
+import { SoundArtwork } from '@/components/ui/sound-artwork';
 
 export const NowPlayingDrawer: React.FC = () => {
   const {
@@ -201,12 +202,20 @@ export const NowPlayingDrawer: React.FC = () => {
 
         {/* Big Artwork Box with Live Badge and Technical Indicator */}
         <div className="relative w-full aspect-square min-h-[260px] sm:min-h-[300px] rounded-3xl overflow-hidden border border-[var(--theme-border,#91AFA9)]/30 shadow-2xl group bg-black/40">
-          <img
-            src={sound.artwork}
-            alt={sound.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 block"
-            loading="eager"
-          />
+          {sound.artwork ? (
+            <img
+              src={sound.artwork}
+              alt={sound.title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 block"
+              loading="eager"
+            />
+          ) : (
+            <SoundArtwork
+              sound={sound}
+              isSpinning={isPlaying}
+              className="w-full h-full"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/35 pointer-events-none" />
 
           {/* Category Tag (Top-Left) */}
@@ -456,12 +465,19 @@ export const NowPlayingDrawer: React.FC = () => {
                 className="w-full flex items-center gap-3 p-2.5 rounded-2xl border border-[var(--theme-border-subtle,rgba(145,175,169,0.15))] hover:border-[var(--theme-accent,#91AFA9)]/60 bg-[var(--theme-elevated,#121C1A)] hover:bg-[var(--theme-hover,#1C2A26)] transition-all text-left group cursor-pointer"
               >
                 <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-black/30">
-                  <img
-                    src={comp.artwork}
-                    alt={comp.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    loading="lazy"
-                  />
+                  {comp.artwork ? (
+                    <img
+                      src={comp.artwork}
+                      alt={comp.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <SoundArtwork
+                      sound={comp}
+                      className="w-full h-full"
+                    />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-heading font-medium text-sm text-[var(--theme-text-primary,#F1F3EF)] group-hover:text-[var(--theme-accent,#91AFA9)] transition-colors truncate">

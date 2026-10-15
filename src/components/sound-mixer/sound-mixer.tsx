@@ -18,6 +18,7 @@ import { CustomMix } from '@/types';
 
 export const SoundMixer: React.FC = () => {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [activeMixerTab, setActiveMixerTab] = useState<'curated' | 'focus' | 'sleep' | 'meditation' | 'all'>('curated');
   const {
     resetMix,
     customMixes,
@@ -26,6 +27,23 @@ export const SoundMixer: React.FC = () => {
     loadPreset,
     activePresetId,
   } = usePlayerStore();
+
+  const curatedSoundIds = ['rain', 'ocean', 'forest', 'fireplace', 'wind', 'snow'];
+  const displayedTracks = React.useMemo(() => {
+    switch (activeMixerTab) {
+      case 'curated':
+        return SOUND_TRACKS.filter((s) => curatedSoundIds.includes(s.id));
+      case 'focus':
+        return SOUND_TRACKS.filter((s) => s.tag === 'Focus');
+      case 'sleep':
+        return SOUND_TRACKS.filter((s) => s.tag === 'Deep Sleep');
+      case 'meditation':
+        return SOUND_TRACKS.filter((s) => s.tag === 'Meditation' || s.tag === 'Calm');
+      case 'all':
+      default:
+        return SOUND_TRACKS;
+    }
+  }, [activeMixerTab]);
 
   const playingLayersCount = Object.values(activeLayers).filter((l) => l.isPlaying).length;
 
@@ -48,9 +66,10 @@ export const SoundMixer: React.FC = () => {
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div>
-          <span className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] block mb-2 transition-colors duration-1000">
-            04 · Soundscape Console
-          </span>
+          <div className="text-xs uppercase font-mono tracking-widest text-[var(--theme-accent,#91AFA9)] flex items-center gap-3 mb-2 transition-colors duration-1000">
+            <span className="w-6 h-[1px] bg-current opacity-70" />
+            <span>05 / Acoustic Studio</span>
+          </div>
           <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-[#F1F3EF] font-heading">
             Acoustic Studio & Faders
           </h2>
@@ -109,9 +128,38 @@ export const SoundMixer: React.FC = () => {
         </div>
       </div>
 
-      {/* 6 Track Channel Fader Grid */}
+      {/* Mixer Channel Category Filter Tabs */}
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        <span className="text-xs font-mono text-[#7E8D86] mr-2">Faders View:</span>
+        {(
+          [
+            { id: 'curated', label: 'Curated (Top 6)' },
+            { id: 'focus', label: 'Focus' },
+            { id: 'sleep', label: 'Deep Sleep' },
+            { id: 'meditation', label: 'Calm & Zen' },
+            { id: 'all', label: 'All 20 Tracks' },
+          ] as const
+        ).map((tab) => {
+          const isSelected = activeMixerTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveMixerTab(tab.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all ${
+                isSelected
+                  ? 'bg-white text-[#0A0F0E] font-medium shadow-sm'
+                  : 'bg-white/5 border border-white/10 text-[#B3BDB6] hover:text-[#F1F3EF] hover:border-white/25'
+              }`}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Track Channel Fader Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {SOUND_TRACKS.map((snd) => (
+        {displayedTracks.map((snd) => (
           <MixerChannel key={snd.id} sound={snd} />
         ))}
       </div>
