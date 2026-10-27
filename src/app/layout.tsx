@@ -3,8 +3,8 @@ import Script from 'next/script';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'STILLWAVE — A Sanctuary for Wandering Minds',
-  description: 'Forty synthesized soundscapes, one at a time. Step away from the noise of the day and let the room change color around you. Calm sound for focus, sleep and quiet.',
+  title: 'STILLWAVE - A Sanctuary for Wandering Minds',
+  description: 'Over fifty soundscapes, one at a time. Step away from the noise of the day and let the room change color around you. Calm sound for focus, sleep and quiet.',
   keywords: [
     'ambient sounds',
     'focus music',
@@ -55,6 +55,10 @@ export default function RootLayout({
         />
         <Script
           src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"
           strategy="beforeInteractive"
         />
         <Script

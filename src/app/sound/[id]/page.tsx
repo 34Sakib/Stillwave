@@ -5,7 +5,9 @@ const SOUND_IDS = [
   'brown', 'thunder', 'snow', 'lake', 'cocoon', 'chimes', 'musicbox', 'drizzle',
   'cloud', 'haze', 'om', 'tide', 'endurance', 'gargantua', 'orbit', 'choir',
   'shire', 'cascade', 'dune', 'biolum', 'neon', 'cafe', 'lofi', 'train',
-  'piano', 'strings', 'harp', 'cello', 'whale', 'aurora', 'cabin', 'clock', 'universe'
+  'piano', 'strings', 'harp', 'cello', 'whale', 'aurora', 'cabin', 'clock',
+  'universe', 'frost', 'mist', 'glacier', 'bamboo', 'moonbeam', 'cloudbed',
+  'tidepool', 'wisp', 'lantern', 'deepblue', 'yt_rain'
 ];
 
 export function generateStaticParams() {

@@ -7,6 +7,7 @@ export function StillwaveApp() {
       suppressHydrationWarning
       dangerouslySetInnerHTML={{
         __html: `
+<div id="intro" aria-hidden="true"><div class="i-glow"></div><div class="i-rg"><i></i><i></i><i></i><i></i></div><div class="i-drop"></div><div class="i-core"><div class="i-word">STILLWAVE</div><div class="i-line"></div><div class="i-tag">a quiet place to listen</div></div><span class="i-skip">tap to skip</span></div>
 <div class="orbs"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 <div class="grain"></div><div class="sp" id="sp"></div><div class="cur" id="cur"></div><div class="pts" id="pts"></div><canvas class="scn" id="scene"></canvas><canvas class="ctrail" id="ctrail"></canvas><div class="cring" id="cring"><span></span></div><div class="cdot" id="cdot"></div>
 
@@ -24,7 +25,7 @@ export function StillwaveApp() {
   
   
   <h1><span class="w" style="--i:0">A</span> <span class="w" style="--i:1">sanctuary</span> <span class="w" style="--i:2">for</span> <em class="w" style="--i:3">wandering</em> <span class="w" style="--i:4">minds.</span></h1>
-  <p class="sub">Forty synthesized soundscapes, one at a time. Step away from the noise of the day and let the room change color around you.</p>
+  <p class="sub">Over fifty soundscapes, one at a time. Step away from the noise of the day and let the room change color around you.</p>
   <div class="cta"><button class="btn p" id="begin">Begin Session</button><a class="btn g" href="#/library">Explore Soundscapes</a></div>
   <canvas class="wv" id="wv"></canvas><a class="cue" href="#favourite">Scroll</a>
 </div>
@@ -37,9 +38,9 @@ export function StillwaveApp() {
 <div class="fvo"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="orb"></i><span class="pb">&#9654;</span></div>
 <div class="fvw"><i style="--d:0.00;--s:0.35"></i><i style="--d:0.14;--s:0.85"></i><i style="--d:0.27;--s:0.64"></i><i style="--d:0.41;--s:0.42"></i><i style="--d:0.55;--s:0.92"></i><i style="--d:0.69;--s:0.71"></i><i style="--d:0.82;--s:0.49"></i><i style="--d:0.96;--s:0.99"></i><i style="--d:0.10;--s:0.78"></i><i style="--d:0.23;--s:0.56"></i><i style="--d:0.37;--s:0.35"></i><i style="--d:0.51;--s:0.85"></i><i style="--d:0.64;--s:0.64"></i><i style="--d:0.78;--s:0.42"></i><i style="--d:0.92;--s:0.92"></i><i style="--d:0.06;--s:0.71"></i><i style="--d:0.19;--s:0.49"></i><i style="--d:0.33;--s:0.99"></i><i style="--d:0.47;--s:0.78"></i><i style="--d:0.60;--s:0.56"></i><i style="--d:0.74;--s:0.35"></i><i style="--d:0.88;--s:0.85"></i><i style="--d:0.01;--s:0.64"></i><i style="--d:0.15;--s:0.42"></i><i style="--d:0.29;--s:0.92"></i><i style="--d:0.43;--s:0.71"></i><i style="--d:0.56;--s:0.49"></i><i style="--d:0.70;--s:0.99"></i><i style="--d:0.84;--s:0.78"></i><i style="--d:0.97;--s:0.56"></i><i style="--d:0.11;--s:0.35"></i><i style="--d:0.25;--s:0.85"></i><i style="--d:0.38;--s:0.64"></i><i style="--d:0.52;--s:0.42"></i><i style="--d:0.66;--s:0.92"></i><i style="--d:0.79;--s:0.71"></i><i style="--d:0.93;--s:0.49"></i><i style="--d:0.07;--s:0.99"></i><i style="--d:0.21;--s:0.78"></i><i style="--d:0.34;--s:0.56"></i><i style="--d:0.48;--s:0.35"></i><i style="--d:0.62;--s:0.85"></i><i style="--d:0.75;--s:0.64"></i><i style="--d:0.89;--s:0.42"></i><i style="--d:0.03;--s:0.92"></i><i style="--d:0.17;--s:0.71"></i><i style="--d:0.30;--s:0.49"></i><i style="--d:0.44;--s:0.99"></i><i style="--d:0.58;--s:0.78"></i><i style="--d:0.71;--s:0.56"></i><i style="--d:0.85;--s:0.35"></i><i style="--d:0.99;--s:0.85"></i><i style="--d:0.12;--s:0.64"></i><i style="--d:0.26;--s:0.42"></i><i style="--d:0.40;--s:0.92"></i><i style="--d:0.54;--s:0.71"></i></div></div></div></section>
 <section id="soundscapes"><div class="wrap">
-  <div class="sh rv"><div><div class="kick">Featured sounds</div><h2>Forty rooms, <em>one at a time.</em></h2></div><p class="note">Choosing a new sound crossfades the old one out. The whole interface takes on its color.</p></div>
+  <div class="sh rv"><div><div class="kick">Featured sounds</div><h2>Fifty rooms, <em>one at a time.</em></h2></div><p class="note">Choosing a new sound crossfades the old one out. The whole interface takes on its color.</p></div>
   <div class="grid" id="grid"></div>
-  <div style="text-align:center;margin-top:48px"><a class="btn g" href="#/library" style="display:inline-block">Browse All &rarr;</a></div>
+  <div style="text-align:center;margin-top:48px"><a class="btn g" href="#/library" style="display:inline-block">Browse all 51 soundscapes &rarr;</a></div>
   <div class="sh rv" style="margin:110px 0 36px"><div><div class="kick">Browse by mood</div><h2>Find your <em>state.</em></h2></div><p class="note">Sounds grouped by what they do for you. Open one to see them all.</p></div>
   <div class="ixg" id="cols"></div>
 </div></section>
@@ -55,7 +56,7 @@ export function StillwaveApp() {
 </div></section>
 </div>
 <div id="library" hidden><div class="wrap" style="padding:140px 0 60px;min-height:100svh"><a class="back" href="#top">&larr; Home</a><div class="sh"><div><div class="kick">Library</div><h2>All <em>soundscapes.</em></h2></div><p class="note" id="lc2"></p></div><div class="lbar"><label class="qs"><svg class="ico" viewBox="0 0 24 24" style="color:var(--t3);flex:none"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="qs" type="search" placeholder="Search all sounds" autocomplete="off" aria-label="Search sounds"></label><div class="fl" id="fl"></div></div><div class="grid" id="lgrid"></div></div></div>
-<footer><b class='fb'>STILLWAVE</b><span>Calm sound for focus, sleep and quiet.</span><span class='fc'>Every sound is generated live in your browser, except Universe. Headphones recommended. Press Space to play or pause, and the arrow keys to switch sounds.</span></footer>
+<footer><div class='fbig' aria-hidden='true'>STILLWAVE</div><span>Calm sound for focus, sleep and quiet.</span><span class='fc'>High-fidelity recordings and live synthesized soundscapes. Headphones recommended. Press Space to play or pause, and the arrow keys to switch sounds.</span></footer>
 </main>
 
 <div class="dock" id="dock">
@@ -66,6 +67,7 @@ export function StillwaveApp() {
 </div>
 
 <button class="tab" id="tab" aria-label="Open or close now playing panel"><span class="eq"><s></s><s></s><s></s></span><span class="tl">Now Playing</span><svg class="ico" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+<div class="ytp" id="ytp"><div class="ytv"></div><div class="ytb"><span>Playing from YouTube</span><a class="yta" target="_blank" rel="noopener" href="#">Watch on YouTube &#8599;</a></div><div class="ytx">This page cannot load YouTube here. <a class="yta" target="_blank" rel="noopener" href="#">Watch it on YouTube &#8599;</a></div></div>
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" aria-label="Now playing">
   <div class="dh"><div class="kick">Now Playing</div><button class="ib" id="dc" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
