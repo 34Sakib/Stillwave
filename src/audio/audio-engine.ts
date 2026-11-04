@@ -218,6 +218,8 @@ class StillwaveAudioEngine {
       };
 
       this.layers.set(soundId, layer);
+    } else if (audioSrc && !layer.audio.src.endsWith(audioSrc) && !layer.audio.src.endsWith(encodeURI(audioSrc))) {
+      layer.audio.src = audioSrc;
     }
 
     // Attach to Web Audio graph if not yet attached

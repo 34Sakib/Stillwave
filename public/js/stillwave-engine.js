@@ -85,8 +85,8 @@ const note=(o,f,ty,pk,du)=>{const s=ctx.createOscillator(),q=G(0),tt=ctx.current
 const PEN=[261.63,293.66,329.63,392,440,523.25,587.33,659.25];
 
 const LOCAL_AUDIO_MAP = {
-  rain: '/audio/rain/gentle_rain.mp3',
-  ocean: '/audio/ocean/ocean-waves.mp3',
+  rain: '/audio/rain/Gentle Rain.mp3',
+  ocean: '/audio/ocean/Ocean.mp3',
   forest: '/audio/forest/nature-forest-sound.mp3',
   fire: '/audio/fireplace/hearth-fireplace.mp3',
   breeze: '/audio/wind/gentle-breeze.wav',
@@ -95,7 +95,9 @@ const LOCAL_AUDIO_MAP = {
   stream: '/audio/stream/mountain-stream.wav',
   brown: '/audio/brown-noise/velvet-brown-noise.wav',
   thunder: '/audio/thunder/distant-thunder.wav',
-  universe: '/audio/universe.mp3'
+  universe: '/audio/universe.mp3',
+  neon: '/audio/rain/Neon Rain City.mp3',
+  snow: '/audio/Snow/Soft Snowfall.mp3'
 };
 
 const audioBufferCache = {};
@@ -146,7 +148,7 @@ function playAudioFile(url, o, n, id) {
   if (audioBufferCache[url]) {
     runBuffer(audioBufferCache[url]);
   } else {
-    fetch(url)
+    fetch(encodeURI(url))
       .then(res => {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.arrayBuffer();
@@ -167,11 +169,11 @@ function playAudioFile(url, o, n, id) {
 
 // Background preload of primary audio files
 if (typeof window !== 'undefined') {
-  const preloadList = ['/audio/rain/gentle_rain.mp3', '/audio/ocean/ocean-waves.mp3', '/audio/fireplace/hearth-fireplace.mp3'];
+  const preloadList = ['/audio/rain/Gentle Rain.mp3', '/audio/ocean/Ocean.mp3', '/audio/rain/Neon Rain City.mp3', '/audio/Snow/Soft Snowfall.mp3', '/audio/fireplace/hearth-fireplace.mp3'];
   const idlePreload = () => {
     preloadList.forEach(u => {
       if (!audioBufferCache[u]) {
-        fetch(u).then(r => r.ok ? r.arrayBuffer() : null).then(ab => {
+        fetch(encodeURI(u)).then(r => r.ok ? r.arrayBuffer() : null).then(ab => {
           if (!ab) return;
           init();
           ctx.decodeAudioData(ab).then(d => {
